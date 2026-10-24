@@ -1,0 +1,100 @@
+# 1.9 litre turbo-diesel four. No throttle plate: load comes from fuelling,
+# so the intake layer stays open and the note is a hard, hollow rattle.
+# Low redline, high compression, heavy low-frequency content.
+
+name = "I4 Diesel 1.9 TDI"
+seed = 849271
+notes = "Turbo-diesel I4. Hard rattle, low redline, strong low-frequency knock."
+
+[engine]
+idle_rpm = 780.0
+redline_rpm = 4600.0
+starter_rpm = 200.0
+
+[block]
+cylinders = 4
+layout = "inline"
+ignition = "compression"
+strokes = 4
+bore_mm = 79.5
+stroke_mm = 95.5
+compression = 19.0
+rod_ratio = 1.55
+
+[exhaust]
+pipe_length_m = 1.0
+pipe_temp_c = 640.0
+comb_gain = 0.56
+comb_repeats = 4
+muffler_cutoff_hz = 2600.0
+bank_asymmetry = 0.0
+modes = [
+    [78.0, 1.60, 1.00],
+    [124.0, 1.80, 0.98],
+    [198.0, 2.00, 0.94],
+    [316.0, 2.20, 0.90],
+    [505.0, 2.40, 0.85],
+    [808.0, 2.55, 0.78],
+    [1292.0, 2.70, 0.70],
+    [2067.0, 2.80, 0.59],
+    [3300.0, 2.60, 0.46],
+]
+
+[intake]
+noise_gain = 0.20
+pulse_gain = 0.25
+runner_length_m = 0.40
+band_lo_hz = 150.0
+band_hi_hz = 4000.0
+modes = [
+    [95.0, 1.70, 1.00],
+    [150.0, 1.90, 0.96],
+    [240.0, 2.10, 0.90],
+    [390.0, 2.30, 0.82],
+    [640.0, 2.40, 0.73],
+    [1050.0, 2.50, 0.62],
+    [1750.0, 2.40, 0.50],
+    [2900.0, 2.20, 0.38],
+    [4000.0, 2.00, 0.28],
+]
+
+[turbo]
+enabled = true
+kind = "turbo"
+max_boost_bar = 1.45
+spool_rpm = 1300.0
+spool_span_rpm = 1100.0
+whistle_hz = 1550.0
+whistle_span_hz = 1800.0
+whistle_gain = 0.14
+whoosh_gain = 0.12
+flutter = false
+blow_off = false
+
+[mechanical]
+# Injector clatter dominates a diesel: loud, hard, and always present.
+valvetrain_gain = 0.065
+valvetrain_bright_hz = 3000.0
+injector_gain = 0.138
+accessory_gain = 0.040
+accessory_hz = 220.0
+
+[character]
+brightness_db = 4.0
+aggression = 1.8
+lumpiness = 0.05
+irregularity = 0.05
+idle_floor = 0.30
+combustion_gain = 1.25
+
+[render]
+sample_rate = 48000
+bit_depth = 16
+channels = 1
+block_size = 1024
+loop_seconds = 2.5
+loop_fade_ms = 14.0
+warmup_cycles = 3
+peak_db = -1.0
+resonator_length_s = 0.14
+kernel_taps = 1025

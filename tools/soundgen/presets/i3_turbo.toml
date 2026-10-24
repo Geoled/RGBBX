@@ -1,0 +1,103 @@
+# 1.0 litre turbocharged inline three (downsized city car engine).
+# Three cylinders cannot hide anything: with only three firings per two
+# revolutions the gaps between pulses are long, so the idle rocks and the
+# exhaust has a hard offbeat to it. Small cylinders put the whole thing an
+# octave higher than a 2.0 four.
+
+name = "I3 1.0 Turbo"
+seed = 20110301
+notes = "1.0 L downsized three. Light flywheel, hard offbeat idle, small hot pipe."
+
+[engine]
+idle_rpm = 900.0
+redline_rpm = 6500.0
+starter_rpm = 250.0
+
+[block]
+cylinders = 3
+layout = "inline"
+ignition = "spark"
+strokes = 4
+bore_mm = 74.5
+stroke_mm = 76.4
+compression = 10.5
+bank_angle_deg = 0.0
+rod_ratio = 1.62
+
+[exhaust]
+pipe_length_m = 0.95
+pipe_temp_c = 640.0
+comb_gain = 0.54
+comb_repeats = 4
+muffler_cutoff_hz = 3600.0
+bank_asymmetry = 0.0
+modes = [
+    [116.0, 1.70, 1.00],
+    [188.0, 1.90, 0.96],
+    [310.0, 2.10, 0.92],
+    [512.0, 2.30, 0.88],
+    [845.0, 2.50, 0.83],
+    [1395.0, 2.65, 0.77],
+    [2300.0, 2.80, 0.70],
+    [3800.0, 2.90, 0.60],
+    [5100.0, 2.75, 0.48],
+]
+
+[intake]
+noise_gain = 0.34
+pulse_gain = 0.42
+runner_length_m = 0.28
+band_lo_hz = 300.0
+band_hi_hz = 6800.0
+modes = [
+    [130.0, 1.60, 1.00],
+    [210.0, 1.80, 0.95],
+    [345.0, 2.00, 0.89],
+    [565.0, 2.20, 0.82],
+    [920.0, 2.40, 0.74],
+    [1500.0, 2.50, 0.64],
+    [2450.0, 2.45, 0.52],
+    [4000.0, 2.25, 0.40],
+    [6000.0, 2.00, 0.29],
+]
+
+[turbo]
+enabled = true
+kind = "turbo"
+max_boost_bar = 1.55
+spool_rpm = 1400.0
+spool_span_rpm = 1200.0
+whistle_hz = 1900.0
+whistle_span_hz = 2400.0
+whistle_gain = 0.16
+whoosh_gain = 0.14
+blow_off = true
+
+[mechanical]
+valvetrain_gain = 0.072
+valvetrain_bright_hz = 4000.0
+injector_gain = 0.030
+accessory_gain = 0.028
+accessory_hz = 255.0
+
+[character]
+brightness_db = 4.0
+presence_hz = 1500.0
+aggression = 1.30
+lumpiness = 0.20
+irregularity = 0.09
+idle_floor = 0.24
+combustion_gain = 1.00
+ccv = 0.13
+
+[render]
+sample_rate = 48000
+bit_depth = 16
+channels = 1
+block_size = 1024
+loop_seconds = 2.5
+loop_fade_ms = 12.0
+warmup_cycles = 3
+peak_db = -1.0
+resonator_length_s = 0.12
+kernel_taps = 1025

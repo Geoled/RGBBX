@@ -1,0 +1,101 @@
+# Ford Barra 4.0 Turbo — the Australian straight-six legend.
+# 4.0 L inline six with a big single turbo: long crank, silky smooth
+# firing, huge mid-range and the famous flutter-tuned BOV.
+
+name = "Ford Barra 4.0T I6"
+seed = 20020501
+notes = "4.0 L turbo inline-six. Smooth long-six hum, big single, loud blow-off flutter."
+
+[engine]
+idle_rpm = 750.0
+redline_rpm = 6200.0
+starter_rpm = 220.0
+
+[block]
+cylinders = 6
+layout = "inline"
+strokes = 4
+bore_mm = 92.3
+stroke_mm = 99.6
+compression = 9.5
+rod_ratio = 1.60
+ve_peak_rpm_frac = 0.52
+ve_peak_value = 1.02
+ve_droop = 0.14
+
+[exhaust]
+pipe_length_m = 1.10
+pipe_temp_c = 700.0
+comb_gain = 0.60
+comb_repeats = 6
+muffler_cutoff_hz = 3200.0
+bank_asymmetry = 0.0
+modes = [
+    [76.0, 1.60, 1.00],
+    [122.0, 1.80, 0.98],
+    [196.0, 2.00, 0.94],
+    [314.0, 2.20, 0.90],
+    [502.0, 2.40, 0.85],
+    [804.0, 2.55, 0.78],
+    [1286.0, 2.70, 0.70],
+    [2058.0, 2.80, 0.59],
+    [3200.0, 2.60, 0.46],
+]
+
+[intake]
+noise_gain = 0.34
+pulse_gain = 0.40
+runner_length_m = 0.40
+band_lo_hz = 200.0
+band_hi_hz = 5600.0
+modes = [
+    [100.0, 1.70, 1.00],
+    [160.0, 1.90, 0.95],
+    [255.0, 2.10, 0.89],
+    [410.0, 2.30, 0.82],
+    [660.0, 2.50, 0.74],
+    [1060.0, 2.60, 0.64],
+    [1700.0, 2.50, 0.52],
+    [2750.0, 2.30, 0.40],
+    [4400.0, 2.00, 0.30],
+]
+
+[turbo]
+enabled = true
+kind = "turbo"
+max_boost_bar = 1.60
+spool_rpm = 1800.0
+spool_span_rpm = 1500.0
+whistle_hz = 1600.0
+whistle_span_hz = 2400.0
+whistle_gain = 0.26
+whoosh_gain = 0.20
+flutter = true
+blow_off = true
+
+[mechanical]
+valvetrain_gain = 0.092
+valvetrain_bright_hz = 3200.0
+injector_gain = 0.036
+accessory_gain = 0.034
+accessory_hz = 220.0
+
+[character]
+brightness_db = 3.2
+aggression = 2.0
+lumpiness = 0.06
+irregularity = 0.05
+idle_floor = 0.22
+combustion_gain = 1.12
+
+[render]
+sample_rate = 48000
+bit_depth = 16
+channels = 1
+block_size = 1024
+loop_seconds = 2.5
+loop_fade_ms = 14.0
+warmup_cycles = 3
+peak_db = -1.0
+resonator_length_s = 0.14
+kernel_taps = 1025

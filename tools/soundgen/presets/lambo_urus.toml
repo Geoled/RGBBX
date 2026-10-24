@@ -1,0 +1,105 @@
+# Lamborghini Urus — 4.0 L twin-turbo V8 (shared with Audi RSQ8).
+# The hot-vee twin-turbo from the family SUV: deep off-boost burble that
+# hardens into a compressed whooshing roar, plus the exhaust's
+# "overshoot" crackle map. Muted but very wide.
+
+name = "Lamborghini Urus 4.0TT V8"
+seed = 20180101
+notes = "4.0 L hot-vee twin-turbo V8. Burble to whoosh, wide and compressed."
+
+[engine]
+idle_rpm = 700.0
+redline_rpm = 6800.0
+starter_rpm = 230.0
+
+[block]
+cylinders = 8
+layout = "v"
+strokes = 4
+bore_mm = 86.0
+stroke_mm = 86.0
+compression = 10.0
+bank_angle_deg = 90.0
+rod_ratio = 1.56
+ve_peak_rpm_frac = 0.60
+ve_peak_value = 1.06
+ve_droop = 0.11
+firing_offsets = [0.000, 0.875, 0.375, 0.250, 0.625, 0.500, 0.750, 0.125]
+
+[exhaust]
+pipe_length_m = 1.05
+pipe_temp_c = 720.0
+comb_gain = 0.62
+comb_repeats = 5
+muffler_cutoff_hz = 3400.0
+bank_asymmetry = 0.14
+modes = [
+    [76.0, 1.58, 1.00],
+    [120.0, 1.78, 0.98],
+    [192.0, 1.98, 0.94],
+    [306.0, 2.18, 0.90],
+    [488.0, 2.38, 0.85],
+    [778.0, 2.53, 0.78],
+    [1240.0, 2.68, 0.70],
+    [1976.0, 2.78, 0.59],
+    [3140.0, 2.62, 0.48],
+    [4700.0, 2.42, 0.40],
+]
+
+[intake]
+noise_gain = 0.34
+pulse_gain = 0.44
+runner_length_m = 0.34
+band_lo_hz = 200.0
+band_hi_hz = 6000.0
+modes = [
+    [102.0, 1.70, 1.00],
+    [162.0, 1.90, 0.95],
+    [258.0, 2.10, 0.89],
+    [412.0, 2.30, 0.82],
+    [660.0, 2.50, 0.74],
+    [1055.0, 2.60, 0.64],
+    [1680.0, 2.50, 0.52],
+    [2720.0, 2.30, 0.40],
+    [4400.0, 2.00, 0.30],
+]
+
+[turbo]
+enabled = true
+kind = "turbo"
+max_boost_bar = 1.40
+spool_rpm = 1600.0
+spool_span_rpm = 1200.0
+whistle_hz = 1800.0
+whistle_span_hz = 2500.0
+whistle_gain = 0.18
+whoosh_gain = 0.26
+flutter = false
+blow_off = true
+
+[mechanical]
+valvetrain_gain = 0.096
+valvetrain_bright_hz = 3600.0
+injector_gain = 0.030
+accessory_gain = 0.030
+accessory_hz = 230.0
+
+[character]
+brightness_db = 3.8
+aggression = 1.9
+lumpiness = 0.12
+irregularity = 0.05
+idle_floor = 0.24
+combustion_gain = 1.16
+
+[render]
+sample_rate = 48000
+bit_depth = 16
+channels = 1
+block_size = 1024
+loop_seconds = 2.5
+loop_fade_ms = 14.0
+warmup_cycles = 3
+peak_db = -1.0
+resonator_length_s = 0.13
+kernel_taps = 1025

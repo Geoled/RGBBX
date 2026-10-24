@@ -1,0 +1,107 @@
+# Chevrolet Camaro ZL1 — 6.2 L supercharged LT4 V8.
+# The big-bird LT4: 1.7 bar roots blower on a 6.2 cross-plane. Instant
+# boost from idle, the classic top-mounted blower whine over the burble.
+
+name = "Chevrolet ZL1 LT4 Supercharged"
+seed = 20170101
+notes = "6.2 L supercharged V8. Instant roots-blower whine over the cross-plane burble."
+
+[engine]
+idle_rpm = 680.0
+redline_rpm = 6400.0
+starter_rpm = 220.0
+
+[block]
+cylinders = 8
+layout = "v"
+strokes = 4
+bore_mm = 103.25
+stroke_mm = 92.0
+compression = 10.0
+# The LT4 runs on premium; 91 keeps the Livengood-Wu ratio honest for a
+# 10.0:1 engine swallowing 1.1 bar so the knock model has something to say.
+octane = 91.0
+bank_angle_deg = 90.0
+rod_ratio = 1.57
+ve_peak_rpm_frac = 0.55
+ve_peak_value = 1.10
+ve_droop = 0.12
+firing_offsets = [0.000, 0.875, 0.375, 0.250, 0.625, 0.500, 0.750, 0.125]
+
+[exhaust]
+pipe_length_m = 1.25
+pipe_temp_c = 680.0
+comb_gain = 0.62
+comb_repeats = 5
+muffler_cutoff_hz = 3200.0
+bank_asymmetry = 0.16
+modes = [
+    [74.0, 1.56, 1.00],
+    [116.0, 1.76, 0.98],
+    [184.0, 1.96, 0.95],
+    [290.0, 2.16, 0.91],
+    [460.0, 2.36, 0.86],
+    [730.0, 2.51, 0.80],
+    [1160.0, 2.66, 0.73],
+    [1840.0, 2.76, 0.64],
+    [2920.0, 2.80, 0.53],
+    [4300.0, 2.55, 0.42],
+]
+
+[intake]
+noise_gain = 0.36
+pulse_gain = 0.46
+runner_length_m = 0.34
+band_lo_hz = 190.0
+band_hi_hz = 5600.0
+modes = [
+    [96.0, 1.70, 1.00],
+    [152.0, 1.90, 0.95],
+    [242.0, 2.10, 0.89],
+    [388.0, 2.30, 0.82],
+    [624.0, 2.50, 0.74],
+    [1000.0, 2.60, 0.64],
+    [1620.0, 2.50, 0.52],
+    [2660.0, 2.30, 0.40],
+    [4400.0, 2.00, 0.30],
+]
+
+[turbo]
+enabled = true
+kind = "supercharger"
+max_boost_bar = 1.10
+spool_rpm = 800.0
+spool_span_rpm = 400.0
+whistle_hz = 900.0
+whistle_span_hz = 700.0
+whistle_gain = 0.32
+whoosh_gain = 0.18
+flutter = false
+blow_off = false
+
+[mechanical]
+valvetrain_gain = 0.108
+valvetrain_bright_hz = 3200.0
+injector_gain = 0.036
+accessory_gain = 0.040
+accessory_hz = 210.0
+
+[character]
+brightness_db = 3.4
+aggression = 2.1
+lumpiness = 0.14
+irregularity = 0.06
+idle_floor = 0.26
+combustion_gain = 1.22
+
+[render]
+sample_rate = 48000
+bit_depth = 16
+channels = 1
+block_size = 1024
+loop_seconds = 2.5
+loop_fade_ms = 14.0
+warmup_cycles = 3
+peak_db = -1.0
+resonator_length_s = 0.14
+kernel_taps = 1025

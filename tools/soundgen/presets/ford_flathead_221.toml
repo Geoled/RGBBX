@@ -1,0 +1,95 @@
+# Ford Flathead V8 — the 1932 221 cubic inch legend.
+# The hot rod original: side-valves muffle the top end, a long low-revving
+# torque curve, and the famous sidepipe blat. It breathes through flathead
+# ports, so the intake is quiet and the exhaust is all mid-bass.
+
+name = "Ford Flathead 221 V8"
+seed = 19320309
+notes = "221 ci flathead V8. Side-valve murmur, low rev limit, the original hot rod voice."
+
+[engine]
+idle_rpm = 480.0
+redline_rpm = 4400.0
+starter_rpm = 180.0
+
+[block]
+cylinders = 8
+layout = "v"
+strokes = 4
+bore_mm = 85.7
+stroke_mm = 95.3
+compression = 6.8
+bank_angle_deg = 90.0
+rod_ratio = 1.50
+ve_peak_rpm_frac = 0.45
+ve_peak_value = 0.86
+ve_droop = 0.22
+firing_offsets = [0.000, 0.875, 0.375, 0.250, 0.625, 0.500, 0.750, 0.125]
+
+[exhaust]
+pipe_length_m = 1.60
+pipe_temp_c = 480.0
+comb_gain = 0.56
+comb_repeats = 5
+muffler_cutoff_hz = 2100.0
+bank_asymmetry = 0.24
+modes = [
+    [58.0, 1.45, 1.00],
+    [90.0, 1.65, 0.98],
+    [142.0, 1.85, 0.95],
+    [224.0, 2.05, 0.91],
+    [354.0, 2.25, 0.86],
+    [560.0, 2.40, 0.80],
+    [888.0, 2.55, 0.73],
+    [1408.0, 2.65, 0.64],
+    [2232.0, 2.75, 0.53],
+    [3100.0, 2.50, 0.42],
+]
+
+[intake]
+noise_gain = 0.22
+pulse_gain = 0.30
+runner_length_m = 0.55
+band_lo_hz = 140.0
+band_hi_hz = 3600.0
+modes = [
+    [76.0, 1.60, 1.00],
+    [120.0, 1.80, 0.95],
+    [190.0, 2.00, 0.89],
+    [300.0, 2.20, 0.82],
+    [480.0, 2.35, 0.73],
+    [760.0, 2.45, 0.62],
+    [1240.0, 2.35, 0.50],
+    [2000.0, 2.15, 0.38],
+    [3200.0, 1.90, 0.28],
+]
+
+[turbo]
+enabled = false
+
+[mechanical]
+valvetrain_gain = 0.062
+valvetrain_bright_hz = 2200.0
+injector_gain = 0.020
+accessory_gain = 0.048
+accessory_hz = 150.0
+
+[character]
+brightness_db = 1.5
+aggression = 1.3
+lumpiness = 0.30
+irregularity = 0.10
+idle_floor = 0.34
+combustion_gain = 1.10
+
+[render]
+sample_rate = 48000
+bit_depth = 16
+channels = 1
+block_size = 1024
+loop_seconds = 2.5
+loop_fade_ms = 16.0
+warmup_cycles = 3
+peak_db = -1.0
+resonator_length_s = 0.17
+kernel_taps = 1025

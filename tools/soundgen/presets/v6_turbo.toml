@@ -1,0 +1,103 @@
+# 3.0 litre twin turbo 90 degree V6 (modern sports saloon).
+# A 90 degree V6 would naturally fire at 90/150 degree intervals, which is why
+# old ones sound lumpy; the modern ones use a split crank pin so the firing is a
+# clean 120 degrees, the same as an inline six. Two small turbos mean the
+# exhaust note is short and hard and the top end is dominated by spool.
+
+name = "V6 3.0 Twin-Turbo"
+seed = 20150501
+notes = "3.0 L 90 deg V6, split pin even firing, twin turbo. Short hard note under the spool."
+
+[engine]
+idle_rpm = 700.0
+redline_rpm = 7000.0
+starter_rpm = 230.0
+
+[block]
+cylinders = 6
+layout = "v"
+ignition = "spark"
+strokes = 4
+bore_mm = 86.0
+stroke_mm = 86.0
+compression = 10.5
+bank_angle_deg = 90.0
+rod_ratio = 1.63
+
+[exhaust]
+pipe_length_m = 1.05
+pipe_temp_c = 660.0
+comb_gain = 0.54
+comb_repeats = 4
+muffler_cutoff_hz = 3600.0
+bank_asymmetry = 0.10
+modes = [
+    [98.0, 1.65, 1.00],
+    [158.0, 1.85, 0.97],
+    [260.0, 2.05, 0.93],
+    [425.0, 2.25, 0.89],
+    [700.0, 2.45, 0.84],
+    [1155.0, 2.60, 0.78],
+    [1900.0, 2.75, 0.70],
+    [3150.0, 2.85, 0.60],
+    [4900.0, 2.70, 0.47],
+]
+
+[intake]
+noise_gain = 0.34
+pulse_gain = 0.43
+runner_length_m = 0.30
+band_lo_hz = 240.0
+band_hi_hz = 6200.0
+modes = [
+    [112.0, 1.70, 1.00],
+    [180.0, 1.95, 0.95],
+    [290.0, 2.20, 0.89],
+    [465.0, 2.45, 0.82],
+    [750.0, 2.65, 0.74],
+    [1230.0, 2.70, 0.64],
+    [2000.0, 2.55, 0.52],
+    [3350.0, 2.30, 0.40],
+    [5200.0, 2.00, 0.29],
+]
+
+[turbo]
+enabled = true
+kind = "turbo"
+max_boost_bar = 1.25
+spool_rpm = 1400.0
+spool_span_rpm = 1300.0
+whistle_hz = 1980.0
+whistle_span_hz = 2500.0
+whistle_gain = 0.15
+whoosh_gain = 0.15
+blow_off = true
+
+[mechanical]
+valvetrain_gain = 0.079
+valvetrain_bright_hz = 3900.0
+injector_gain = 0.033
+accessory_gain = 0.030
+accessory_hz = 230.0
+
+[character]
+brightness_db = 3.9
+presence_hz = 1400.0
+aggression = 1.42
+lumpiness = 0.10
+irregularity = 0.06
+idle_floor = 0.24
+combustion_gain = 1.05
+ccv = 0.11
+
+[render]
+sample_rate = 48000
+bit_depth = 16
+channels = 1
+block_size = 1024
+loop_seconds = 2.5
+loop_fade_ms = 12.0
+warmup_cycles = 3
+peak_db = -1.0
+resonator_length_s = 0.13
+kernel_taps = 1025

@@ -1,0 +1,144 @@
+# Lexus LFA — 1LR-GUE 4.8 litre 72-degree V10.
+# The defining feature is not torque but the way it climbs: ten cylinders at
+# 72 degrees, individual throttle bodies, an equal-length titanium exhaust and
+# a 9000 rpm limiter. The pulse train never really has a gap in it, so the note
+# stops being a series of bangs and becomes a metallic, almost two-stroke wail
+# with a hard edge on every firing.
+
+name = "Lexus LFA 4.8 V10"
+seed = 20101021
+notes = "4.8 L 72 deg V10, 9000 rpm. Individual throttles, titanium exhaust: F1-like wail."
+
+[engine]
+idle_rpm = 900.0
+redline_rpm = 9000.0
+starter_rpm = 300.0
+
+[block]
+cylinders = 10
+layout = "v"
+ignition = "spark"
+strokes = 4
+bore_mm = 88.5
+stroke_mm = 78.1
+compression = 12.0
+bank_angle_deg = 72.0
+rod_ratio = 1.62
+# The 1LR-GUE is a race-derived engine: individual throttles, equal-length
+# headers and cam timing that keep filling the cylinders to 9000 rpm. Without
+# this the model would make its peak power at 6500 and sound like a big lazy V8.
+ve_peak_rpm_frac = 0.70
+ve_peak_value = 1.15
+ve_droop = 0.06
+
+[exhaust]
+# Equal-length headers into a titanium system with very little silencing. Hot
+# gas keeps the quarter-wave line high, so the pipe sings instead of booming.
+pipe_length_m = 0.96
+pipe_temp_c = 820.0
+comb_gain = 0.62
+comb_repeats = 5
+muffler_cutoff_hz = 6400.0
+bank_asymmetry = 0.05
+runner_length_m = 0.30
+runner_spread = 0.07
+runner_reflect = 0.34
+flow_noise = 0.30
+flow_burst = 0.65
+tail_noise = 0.10
+flow_band_lo_hz = 220.0
+flow_band_hi_hz = 7000.0
+modes = [
+    [88.0, 1.70, 1.00],
+    [142.0, 1.90, 0.97],
+    [232.0, 2.10, 0.94],
+    [378.0, 2.30, 0.91],
+    [618.0, 2.50, 0.87],
+    [1010.0, 2.70, 0.82],
+    [1650.0, 2.90, 0.75],
+    [2680.0, 3.10, 0.66],
+    [4300.0, 3.15, 0.55],
+    [6200.0, 3.00, 0.43],
+]
+
+[intake]
+# Ten individual throttle bodies: a very direct, high, hard induction note.
+noise_gain = 0.40
+pulse_gain = 0.58
+runner_length_m = 0.28
+runner_spread = 0.10
+runner_reflect = 0.32
+runner_sound_speed = 365.0
+band_lo_hz = 300.0
+band_hi_hz = 9000.0
+modes = [
+    [132.0, 1.90, 1.00],
+    [208.0, 2.10, 0.96],
+    [330.0, 2.35, 0.92],
+    [520.0, 2.60, 0.87],
+    [825.0, 2.85, 0.80],
+    [1310.0, 3.05, 0.71],
+    [2080.0, 3.10, 0.61],
+    [3300.0, 2.90, 0.49],
+    [5250.0, 2.55, 0.36],
+]
+
+[turbo]
+enabled = false
+
+[mechanical]
+valvetrain_gain = 0.068
+valvetrain_bright_hz = 5400.0
+injector_gain = 0.025
+accessory_gain = 0.024
+accessory_hz = 260.0
+hiss_gain = 0.017
+crank_gain = 0.09
+crank_hz = 132.0
+slap_gain = 0.055
+slap_hz = 255.0
+chain_gain = 0.030
+chain_hz = 420.0
+friction_gain = 0.020
+friction_lo_hz = 65.0
+friction_hi_hz = 440.0
+
+[space]
+# Open pit lane rather than a street: fewer hard early reflections, a longer
+# and brighter tail.
+enabled = true
+mix = 0.15
+predelay_ms = 19.0
+decay_s = 0.44
+damping_hz = 4400.0
+early_gain = 0.48
+tail_gain = 0.78
+
+[character]
+brightness_db = 5.4
+presence_hz = 2300.0
+presence_q = 0.72
+air_cutoff_hz = 7200.0
+air_order = 2
+aggression = 1.45
+lumpiness = 0.0
+irregularity = 0.035
+idle_floor = 0.20
+combustion_gain = 1.10
+ccv = 0.07
+load_sharpening = 0.58
+transient_bark = 0.7
+pulse_ref_rpm = 4200.0
+pulse_min_scale = 0.36
+
+[render]
+sample_rate = 48000
+bit_depth = 16
+channels = 1
+block_size = 1024
+loop_seconds = 2.5
+loop_fade_ms = 14.0
+warmup_cycles = 3
+peak_db = -1.0
+resonator_length_s = 0.11
+kernel_taps = 1025

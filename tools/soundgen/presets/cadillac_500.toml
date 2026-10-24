@@ -1,0 +1,94 @@
+# Cadillac 500 — 8.2 L monster V8, the largest post-war Cadillac engine.
+# Everything about it is excess: 8.2 litres, 10.25:1 compression, a lopey
+# low idle and a redline barely past 4000. Pure velvet thunder.
+
+name = "Cadillac 500 8.2 V8"
+seed = 19700101
+notes = "8.2 L cross-plane V8. The biggest Caddy: velvet thunder, sub-4500 rpm redline."
+
+[engine]
+idle_rpm = 550.0
+redline_rpm = 4200.0
+starter_rpm = 190.0
+
+[block]
+cylinders = 8
+layout = "v"
+strokes = 4
+bore_mm = 109.2
+stroke_mm = 109.2
+compression = 10.25
+bank_angle_deg = 90.0
+rod_ratio = 1.52
+ve_peak_rpm_frac = 0.42
+ve_peak_value = 0.94
+ve_droop = 0.26
+firing_offsets = [0.000, 0.875, 0.375, 0.250, 0.625, 0.500, 0.750, 0.125]
+
+[exhaust]
+pipe_length_m = 1.75
+pipe_temp_c = 500.0
+comb_gain = 0.58
+comb_repeats = 5
+muffler_cutoff_hz = 2200.0
+bank_asymmetry = 0.22
+modes = [
+    [54.0, 1.42, 1.00],
+    [84.0, 1.62, 0.98],
+    [132.0, 1.82, 0.95],
+    [208.0, 2.02, 0.91],
+    [330.0, 2.22, 0.86],
+    [522.0, 2.38, 0.80],
+    [828.0, 2.52, 0.73],
+    [1312.0, 2.64, 0.64],
+    [2080.0, 2.74, 0.53],
+    [3000.0, 2.48, 0.42],
+]
+
+[intake]
+noise_gain = 0.28
+pulse_gain = 0.38
+runner_length_m = 0.60
+band_lo_hz = 130.0
+band_hi_hz = 4200.0
+modes = [
+    [72.0, 1.58, 1.00],
+    [114.0, 1.78, 0.95],
+    [180.0, 1.98, 0.89],
+    [285.0, 2.18, 0.82],
+    [455.0, 2.35, 0.73],
+    [720.0, 2.45, 0.62],
+    [1150.0, 2.35, 0.50],
+    [1850.0, 2.15, 0.38],
+    [3000.0, 1.90, 0.28],
+]
+
+[turbo]
+enabled = false
+
+[mechanical]
+valvetrain_gain = 0.096
+valvetrain_bright_hz = 2600.0
+injector_gain = 0.038
+accessory_gain = 0.055
+accessory_hz = 165.0
+
+[character]
+brightness_db = 2.0
+aggression = 1.35
+lumpiness = 0.28
+irregularity = 0.09
+idle_floor = 0.36
+combustion_gain = 1.22
+
+[render]
+sample_rate = 48000
+bit_depth = 16
+channels = 1
+block_size = 1024
+loop_seconds = 2.5
+loop_fade_ms = 16.0
+warmup_cycles = 3
+peak_db = -1.0
+resonator_length_s = 0.18
+kernel_taps = 1025

@@ -1,0 +1,103 @@
+# Ford GT — 3.5 L twin-turbo EcoBoost V6.
+# The second-gen supercar: a 60-degree V6 with two big turbos, dry sump and
+# a flat-plane-style bark compressed by 1.6 bar. Airplane-grade whoosh.
+
+name = "Ford GT 3.5TT V6"
+seed = 20170102
+notes = "3.5 L twin-turbo 60 deg V6. EcoBoost supercar: compressed V6 bark + big whoosh."
+
+[engine]
+idle_rpm = 750.0
+redline_rpm = 7000.0
+starter_rpm = 240.0
+
+[block]
+cylinders = 6
+layout = "v"
+strokes = 4
+bore_mm = 92.5
+stroke_mm = 86.0
+compression = 9.9
+bank_angle_deg = 60.0
+rod_ratio = 1.62
+ve_peak_rpm_frac = 0.64
+ve_peak_value = 1.08
+ve_droop = 0.10
+
+[exhaust]
+pipe_length_m = 0.95
+pipe_temp_c = 780.0
+comb_gain = 0.62
+comb_repeats = 3
+muffler_cutoff_hz = 4200.0
+bank_asymmetry = 0.08
+modes = [
+    [86.0, 1.68, 1.00],
+    [136.0, 1.88, 0.98],
+    [216.0, 2.08, 0.94],
+    [344.0, 2.28, 0.90],
+    [548.0, 2.48, 0.85],
+    [872.0, 2.63, 0.78],
+    [1388.0, 2.78, 0.70],
+    [2210.0, 2.88, 0.59],
+    [3300.0, 2.70, 0.48],
+    [4800.0, 2.50, 0.40],
+]
+
+[intake]
+noise_gain = 0.38
+pulse_gain = 0.46
+runner_length_m = 0.30
+band_lo_hz = 240.0
+band_hi_hz = 6800.0
+modes = [
+    [112.0, 1.74, 1.00],
+    [178.0, 1.94, 0.95],
+    [282.0, 2.18, 0.89],
+    [448.0, 2.42, 0.82],
+    [710.0, 2.62, 0.74],
+    [1125.0, 2.72, 0.64],
+    [1780.0, 2.62, 0.52],
+    [2820.0, 2.42, 0.40],
+    [4600.0, 2.10, 0.30],
+]
+
+[turbo]
+enabled = true
+kind = "turbo"
+max_boost_bar = 1.60
+spool_rpm = 1900.0
+spool_span_rpm = 1200.0
+whistle_hz = 2000.0
+whistle_span_hz = 2700.0
+whistle_gain = 0.22
+whoosh_gain = 0.28
+flutter = false
+blow_off = true
+
+[mechanical]
+valvetrain_gain = 0.090
+valvetrain_bright_hz = 4200.0
+injector_gain = 0.032
+accessory_gain = 0.028
+accessory_hz = 250.0
+
+[character]
+brightness_db = 4.4
+aggression = 2.0
+lumpiness = 0.04
+irregularity = 0.05
+idle_floor = 0.20
+combustion_gain = 1.16
+
+[render]
+sample_rate = 48000
+bit_depth = 16
+channels = 1
+block_size = 1024
+loop_seconds = 2.5
+loop_fade_ms = 13.0
+warmup_cycles = 3
+peak_db = -1.0
+resonator_length_s = 0.12
+kernel_taps = 1025

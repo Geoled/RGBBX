@@ -1,0 +1,115 @@
+# Ferrari 488 / F8 — 3.9 L twin-turbo V8.
+# The F154: 90-degree hot-vee V8 with twin IHI ball-bearing turbos. The
+# flat-plane crack is compressed by boost into a tearing snarl; the
+# "turbo lag" of the old 488 GTB tuned out with low-inertia wheels.
+
+name = "Ferrari F8 Tributo 3.9TT V8"
+seed = 20190304
+notes = "3.9 L twin-turbo flat-plane V8. Compressed tearing snarl, fast spool."
+
+[engine]
+idle_rpm = 800.0
+redline_rpm = 8000.0
+starter_rpm = 260.0
+
+[block]
+cylinders = 8
+layout = "v"
+strokes = 4
+bore_mm = 86.5
+stroke_mm = 82.0
+compression = 9.6
+bank_angle_deg = 90.0
+rod_ratio = 1.66
+ve_peak_rpm_frac = 0.68
+ve_peak_value = 1.10
+ve_droop = 0.09
+# flat-plane crank: even 90-degree intervals, alternating banks
+firing_offsets = [0.000, 0.625, 0.250, 0.875, 0.125, 0.750, 0.500, 0.375]
+
+[exhaust]
+pipe_length_m = 0.90
+pipe_temp_c = 800.0
+comb_gain = 0.64
+comb_repeats = 4
+muffler_cutoff_hz = 5200.0
+bank_asymmetry = 0.06
+modes = [
+    [88.0, 1.72, 1.00],
+    [142.0, 1.92, 0.97],
+    [230.0, 2.12, 0.94],
+    [372.0, 2.32, 0.91],
+    [602.0, 2.52, 0.87],
+    [974.0, 2.72, 0.82],
+    [1576.0, 2.92, 0.75],
+    [2550.0, 3.12, 0.66],
+    [3900.0, 3.05, 0.55],
+    [5400.0, 2.85, 0.45],
+]
+
+[intake]
+noise_gain = 0.40
+pulse_gain = 0.52
+runner_length_m = 0.28
+band_lo_hz = 260.0
+band_hi_hz = 8200.0
+modes = [
+    [122.0, 1.84, 1.00],
+    [194.0, 2.04, 0.96],
+    [308.0, 2.28, 0.92],
+    [488.0, 2.52, 0.87],
+    [772.0, 2.78, 0.80],
+    [1220.0, 2.98, 0.71],
+    [1930.0, 3.06, 0.61],
+    [3050.0, 2.86, 0.49],
+    [4800.0, 2.50, 0.36],
+]
+
+[turbo]
+enabled = true
+kind = "turbo"
+max_boost_bar = 1.70
+spool_rpm = 2000.0
+spool_span_rpm = 1100.0
+whistle_hz = 2200.0
+whistle_span_hz = 2800.0
+whistle_gain = 0.20
+whoosh_gain = 0.24
+flutter = false
+blow_off = true
+
+[mechanical]
+valvetrain_gain = 0.084
+valvetrain_bright_hz = 4800.0
+injector_gain = 0.026
+accessory_gain = 0.024
+accessory_hz = 260.0
+
+[character]
+brightness_db = 5.0
+presence_hz = 2200.0
+presence_q = 0.72
+air_cutoff_hz = 7000.0
+air_order = 2
+aggression = 2.0
+lumpiness = 0.02
+irregularity = 0.04
+idle_floor = 0.18
+combustion_gain = 1.15
+ccv = 0.06
+load_sharpening = 0.62
+transient_bark = 0.80
+pulse_ref_rpm = 4200.0
+pulse_min_scale = 0.33
+
+[render]
+sample_rate = 48000
+bit_depth = 16
+channels = 1
+block_size = 1024
+loop_seconds = 2.5
+loop_fade_ms = 12.0
+warmup_cycles = 3
+peak_db = -1.0
+resonator_length_s = 0.10
+kernel_taps = 1025

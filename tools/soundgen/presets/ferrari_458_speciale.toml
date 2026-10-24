@@ -1,0 +1,105 @@
+# Ferrari F140 8-cylinder... no: the Ferrari Colombo 412 GT Boxer? Keep it
+# REAL and simple: the Ferrari 458 Speciale — 4.5 L NA flat-plane V8,
+# 9000 rpm, the last naturally aspirated mid-engine Ferrari V8.
+
+name = "Ferrari 458 Speciale 4.5 V8"
+seed = 20130801
+notes = "4.5 L flat-plane NA V8, 9000 rpm. The last NA mid-engine V8: pure crack and wail."
+
+[engine]
+idle_rpm = 850.0
+redline_rpm = 9000.0
+starter_rpm = 280.0
+
+[block]
+cylinders = 8
+layout = "v"
+strokes = 4
+bore_mm = 94.0
+stroke_mm = 81.0
+compression = 12.5
+bank_angle_deg = 90.0
+rod_ratio = 1.66
+ve_peak_rpm_frac = 0.75
+ve_peak_value = 1.14
+ve_droop = 0.06
+firing_offsets = [0.000, 0.625, 0.250, 0.875, 0.125, 0.750, 0.500, 0.375]
+
+[exhaust]
+pipe_length_m = 0.85
+pipe_temp_c = 850.0
+comb_gain = 0.66
+comb_repeats = 4
+muffler_cutoff_hz = 7200.0
+bank_asymmetry = 0.04
+modes = [
+    [92.0, 1.80, 1.00],
+    [150.0, 2.00, 0.97],
+    [244.0, 2.20, 0.94],
+    [396.0, 2.40, 0.91],
+    [642.0, 2.60, 0.87],
+    [1040.0, 2.80, 0.82],
+    [1685.0, 3.00, 0.75],
+    [2730.0, 3.20, 0.66],
+    [4420.0, 3.25, 0.55],
+    [6800.0, 3.10, 0.44],
+    [8400.0, 2.95, 0.36],
+]
+
+[intake]
+noise_gain = 0.42
+pulse_gain = 0.58
+runner_length_m = 0.25
+band_lo_hz = 300.0
+band_hi_hz = 9600.0
+modes = [
+    [134.0, 1.92, 1.00],
+    [212.0, 2.12, 0.96],
+    [336.0, 2.36, 0.92],
+    [530.0, 2.60, 0.87],
+    [838.0, 2.86, 0.80],
+    [1325.0, 3.06, 0.71],
+    [2095.0, 3.14, 0.61],
+    [3310.0, 2.94, 0.49],
+    [5200.0, 2.60, 0.36],
+    [7400.0, 2.28, 0.27],
+]
+
+[turbo]
+enabled = false
+
+[mechanical]
+valvetrain_gain = 0.068
+valvetrain_bright_hz = 6000.0
+injector_gain = 0.022
+accessory_gain = 0.020
+accessory_hz = 290.0
+
+[character]
+brightness_db = 5.8
+presence_hz = 2450.0
+presence_q = 0.70
+air_cutoff_hz = 8000.0
+air_order = 2
+aggression = 1.62
+lumpiness = 0.0
+irregularity = 0.028
+idle_floor = 0.16
+combustion_gain = 1.14
+ccv = 0.05
+load_sharpening = 0.64
+transient_bark = 0.84
+pulse_ref_rpm = 4500.0
+pulse_min_scale = 0.32
+
+[render]
+sample_rate = 48000
+bit_depth = 16
+channels = 1
+block_size = 1024
+loop_seconds = 2.5
+loop_fade_ms = 11.0
+warmup_cycles = 3
+peak_db = -1.0
+resonator_length_s = 0.09
+kernel_taps = 1025

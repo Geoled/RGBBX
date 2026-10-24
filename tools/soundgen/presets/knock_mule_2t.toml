@@ -1,0 +1,107 @@
+# Knock research mule: a 2.0 turbo four with 9.8:1 static compression, a
+# small intercooler and regular 87-octane fuel -- deliberately marginal, the
+# classic "tuned turbo on pump gas" combination. It demonstrates the full
+# knock loop: tendency rises off-boost, the sensor pulls timing, torque
+# dips, and everything recovers when the load comes off.
+
+name = "Knock Mule 2.0T 87"
+seed = 44444444
+notes = "Research mule: 9.8:1 + 1.4 bar + 87 octane + weak intercooler. Detonates on low-rpm WOT by design."
+
+[engine]
+idle_rpm = 850.0
+redline_rpm = 6800.0
+starter_rpm = 250.0
+
+[block]
+cylinders = 4
+layout = "inline"
+strokes = 4
+bore_mm = 86.0
+stroke_mm = 86.0
+compression = 10.4
+octane = 87.0
+rod_ratio = 1.55
+ve_peak_rpm_frac = 0.58
+ve_peak_value = 1.00
+ve_droop = 0.12
+
+[exhaust]
+pipe_length_m = 0.90
+pipe_temp_c = 700.0
+comb_gain = 0.58
+comb_repeats = 4
+muffler_cutoff_hz = 3400.0
+bank_asymmetry = 0.0
+modes = [
+    [92.0, 1.70, 1.00],
+    [148.0, 1.90, 0.97],
+    [240.0, 2.10, 0.93],
+    [390.0, 2.30, 0.89],
+    [632.0, 2.50, 0.84],
+    [1025.0, 2.65, 0.77],
+    [1662.0, 2.80, 0.69],
+    [2695.0, 2.90, 0.58],
+    [4300.0, 2.70, 0.46],
+]
+
+[intake]
+noise_gain = 0.38
+pulse_gain = 0.40
+runner_length_m = 0.30
+band_lo_hz = 300.0
+band_hi_hz = 7000.0
+modes = [
+    [120.0, 1.70, 1.00],
+    [190.0, 1.90, 0.95],
+    [300.0, 2.10, 0.89],
+    [480.0, 2.30, 0.82],
+    [780.0, 2.50, 0.74],
+    [1300.0, 2.60, 0.64],
+    [2200.0, 2.50, 0.52],
+    [3800.0, 2.30, 0.40],
+    [5800.0, 2.00, 0.30],
+]
+
+[turbo]
+enabled = true
+kind = "turbo"
+max_boost_bar = 1.40
+spool_rpm = 1300.0
+spool_span_rpm = 1100.0
+# Token intercooler: the whole point of this mule. A hot charge with 87
+# octane is what puts the end gas inside the Livengood-Wu window.
+charge_cooling = 0.35
+whistle_hz = 1550.0
+whistle_span_hz = 1800.0
+whistle_gain = 0.14
+whoosh_gain = 0.12
+flutter = false
+blow_off = true
+
+[mechanical]
+valvetrain_gain = 0.072
+valvetrain_bright_hz = 4000.0
+injector_gain = 0.030
+accessory_gain = 0.028
+accessory_hz = 250.0
+
+[character]
+brightness_db = 3.5
+aggression = 1.9
+lumpiness = 0.08
+irregularity = 0.06
+idle_floor = 0.20
+combustion_gain = 1.05
+
+[render]
+sample_rate = 48000
+bit_depth = 16
+channels = 1
+block_size = 1024
+loop_seconds = 2.5
+loop_fade_ms = 12.0
+warmup_cycles = 3
+peak_db = -1.0
+resonator_length_s = 0.12
+kernel_taps = 1025

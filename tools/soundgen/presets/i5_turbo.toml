@@ -1,0 +1,106 @@
+# 2.5 litre turbocharged inline five (the classic quattro engine).
+# Five cylinders fire every 144 degrees, so the pulse train never settles into
+# the simple symmetry of a four or a six. The result is the famous warble: half
+# order content that no amount of even firing removes. It is reproduced here by
+# deliberately spreading the primary runner lengths, which is what makes the
+# real engine warble too.
+
+name = "I5 2.5 Turbo"
+seed = 20090311
+notes = "2.5 L five cylinder turbo. Even 144 deg firing, but uneven runners give the half order warble."
+
+[engine]
+idle_rpm = 800.0
+redline_rpm = 7000.0
+starter_rpm = 240.0
+
+[block]
+cylinders = 5
+layout = "inline"
+ignition = "spark"
+strokes = 4
+bore_mm = 82.5
+stroke_mm = 92.8
+compression = 10.0
+bank_angle_deg = 0.0
+rod_ratio = 1.60
+
+[exhaust]
+pipe_length_m = 1.05
+pipe_temp_c = 660.0
+comb_gain = 0.54
+comb_repeats = 5
+muffler_cutoff_hz = 3800.0
+bank_asymmetry = 0.0
+runner_spread = 0.34
+modes = [
+    [100.0, 1.70, 1.00],
+    [162.0, 1.90, 0.97],
+    [268.0, 2.10, 0.93],
+    [442.0, 2.30, 0.89],
+    [730.0, 2.50, 0.84],
+    [1205.0, 2.65, 0.78],
+    [1990.0, 2.80, 0.70],
+    [3290.0, 2.90, 0.60],
+    [4600.0, 2.75, 0.48],
+]
+
+[intake]
+noise_gain = 0.36
+pulse_gain = 0.44
+runner_length_m = 0.30
+runner_spread = 0.26
+band_lo_hz = 260.0
+band_hi_hz = 6200.0
+modes = [
+    [118.0, 1.60, 1.00],
+    [190.0, 1.80, 0.95],
+    [305.0, 2.00, 0.89],
+    [490.0, 2.20, 0.82],
+    [790.0, 2.40, 0.74],
+    [1290.0, 2.50, 0.64],
+    [2100.0, 2.45, 0.52],
+    [3500.0, 2.25, 0.40],
+    [5400.0, 2.00, 0.29],
+]
+
+[turbo]
+enabled = true
+kind = "turbo"
+max_boost_bar = 1.45
+spool_rpm = 1600.0
+spool_span_rpm = 1400.0
+whistle_hz = 1820.0
+whistle_span_hz = 2500.0
+whistle_gain = 0.17
+whoosh_gain = 0.15
+blow_off = true
+
+[mechanical]
+valvetrain_gain = 0.079
+valvetrain_bright_hz = 3900.0
+injector_gain = 0.033
+accessory_gain = 0.030
+accessory_hz = 235.0
+
+[character]
+brightness_db = 4.0
+presence_hz = 1450.0
+aggression = 1.40
+lumpiness = 0.14
+irregularity = 0.12
+idle_floor = 0.24
+combustion_gain = 1.05
+ccv = 0.15
+
+[render]
+sample_rate = 48000
+bit_depth = 16
+channels = 1
+block_size = 1024
+loop_seconds = 2.5
+loop_fade_ms = 12.0
+warmup_cycles = 3
+peak_db = -1.0
+resonator_length_s = 0.12
+kernel_taps = 1025

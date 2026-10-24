@@ -1,0 +1,204 @@
+# ============================================================================
+#  ENGINE PRESET TEMPLATE
+# ============================================================================
+# Copy this file to presets/<your_engine>.toml, give it a name, and edit the
+# numbers. Files whose name starts with "_" are not loaded as engines, so this
+# template never appears in the app.
+#
+#   python -m soundgen new my_engine          # scaffold this file for you
+#   python -m soundgen info --preset presets/my_engine.toml
+#   python -m soundgen render --preset presets/my_engine.toml --out out
+#   python -m simulator --preset presets/my_engine.toml
+#
+# Every field has a working default, so a preset only needs the things it wants
+# to change. Unknown keys are rejected with a suggestion instead of being
+# silently ignored -- a typo cannot sneak into the sound.
+#
+# Full guide: docs/CREATING_ENGINES.md
+# ============================================================================
+
+name = "V12-por I12 12.5"      # shown in the app and the dyno
+seed = 12345                   # changes the per-cylinder noise/irregularity
+notes = "12.5 L turbo inline-twelve revving to 27,000 rpm: a synthetic high-rpm screamer."
+
+# ---------------------------------------------------------------------------
+# [engine] -- operating points
+# ---------------------------------------------------------------------------
+[engine]
+idle_rpm = 850.0               # the idle governor's target
+redline_rpm = 27000.0           # limiter and the top of the dyno pull
+starter_rpm = 260.0            # cranking speed
+
+# ---------------------------------------------------------------------------
+# [block] -- geometry and firing
+# ---------------------------------------------------------------------------
+[block]
+cylinders = 12
+layout = "inline"              # inline | v | boxer | rotary | radial | turbine
+ignition = "spark"             # spark | compression | turbine
+strokes = 4                    # 2 or 4 (ignored for rotary/turbine)
+bore_mm = 117.0
+stroke_mm = 97.0
+compression = 10.5             # raises indicated efficiency and diesel knock
+bank_angle_deg = 0.0           # 90 for a cross-plane V8, 72 for a V10, 180 boxer
+rod_ratio = 1.62               # rod length / crank radius (1.5-1.7 typical)
+
+# Firing offsets, in fractions of one full cycle. Leave empty for even firing
+# (cylinder i fires at i / cylinders). A cross-plane V8 or a big-bang engine
+# lists its real order; the first value is cylinder 1.
+firing_offsets = []
+
+# Volumetric-efficiency curve. Leave at 0 for the automatic curve (peak at 55 %
+# of the redline, 30 % loss by it). A race-derived engine holds its VE much
+# higher, which is what lets it make power at 8500 instead of 6500.
+ve_peak_rpm_frac = 0.0         # 0 = auto; 0.65 puts peak VE at 65 % of redline
+ve_droop = 0.0                 # 0 = auto (0.30); smaller = flatter top end
+ve_peak_value = 0.0            # 0 = auto; >1.0 models ram-effect breathing
+
+# ---------------------------------------------------------------------------
+# [exhaust] -- the pipe, the collector, the silencer
+# ---------------------------------------------------------------------------
+[exhaust]
+pipe_length_m = 12.10           # tailpipe length; sets the quarter-wave line
+pipe_temp_c = 820.0            # hotter gas -> faster sound -> higher formants
+comb_gain = 0.68               # strength of the pipe's reflections
+comb_repeats = 4
+comb_invert = true             # true = open-end reflection (quarter-wave pipe)
+muffler_cutoff_hz = 4200.0     # low-pass after the pipe; lower = more muffled
+bank_asymmetry = 0.0           # 0.13 makes a V engine's two banks differ
+runner_length_m = 0.0          # 0 = derive from pipe_length_m
+runner_spread = 0.18           # +/- length spread between cylinders
+runner_reflect = 0.42          # reflection at the collector
+flow_noise = 0.25              # continuous gas roar (scaled by rpm x load)
+flow_burst = 0.55              # the blowdown turbulence burst, once per event
+tail_noise = 0.07              # shear-layer roar downstream of the muffler
+flow_band_lo_hz = 180.0
+flow_band_hi_hz = 5200.0
+formant_shift = 0.16           # how far the pipe rises when hot
+# Broad body resonances: [frequency_hz, Q, gain]. Q rises with frequency in a
+# real pipe; a flat Q bank sounds like a synthesiser.
+modes = [
+    [100.0, 1.80, 1.00],
+    [165.0, 2.00, 0.96],
+    [272.0, 2.20, 0.92],
+    [448.0, 2.40, 0.88],
+    [738.0, 2.55, 0.83],
+    [1215.0, 2.70, 0.77],
+    [2000.0, 2.85, 0.70],
+    [3300.0, 2.95, 0.60],
+    [4400.0, 2.80, 0.50],
+]
+
+# ---------------------------------------------------------------------------
+# [intake] -- induction roar and intake-valve noise
+# ---------------------------------------------------------------------------
+[intake]
+noise_gain = 0.30
+pulse_gain = 0.45
+runner_length_m = 0.35
+runner_spread = 0.18
+runner_reflect = 0.35
+runner_sound_speed = 361.0     # cold charge, ~60 C
+band_lo_hz = 250.0
+band_hi_hz = 6500.0
+modes = [
+    [110.0, 1.60, 1.00],
+    [175.0, 1.80, 0.95],
+    [280.0, 2.00, 0.89],
+    [450.0, 2.20, 0.82],
+    [730.0, 2.40, 0.74],
+    [1200.0, 2.50, 0.64],
+    [2000.0, 2.50, 0.53],
+    [3400.0, 2.30, 0.42],
+    [5200.0, 2.00, 0.32],
+]
+
+# ---------------------------------------------------------------------------
+# [turbo] -- turbocharger or supercharger (also drives the physics boost model)
+# ---------------------------------------------------------------------------
+[turbo]
+enabled = false
+kind = "turbo"                 # turbo | supercharger
+max_boost_bar = 1.0            # wastegate-limited gauge boost at full load
+spool_rpm = 2400.0             # below this the turbine makes nothing
+spool_span_rpm = 3200.0        # rpm band over which it reaches full boost
+whistle_hz = 2400.0
+whistle_span_hz = 3600.0
+whistle_gain = 0.16
+idle_whistle = 0.0             # 0 for a piston turbo; ~0.45 for a gas turbine
+whoosh_gain = 0.12
+flutter = false                # wastegate flutter
+blow_off = true                # adds the blow-off one-shot
+
+# ---------------------------------------------------------------------------
+# [mechanical] -- everything that is not combustion
+# ---------------------------------------------------------------------------
+[mechanical]
+valvetrain_gain = 0.079         # valve-seat clicks at 370/600 crank degrees
+valvetrain_bright_hz = 3800.0
+injector_gain = 0.025           # injector ticks at 350 degrees
+accessory_gain = 0.06          # alternator / pump whine
+accessory_hz = 300.0           # at idle; scales with rpm
+hiss_gain = 0.020              # broadband mechanical floor
+hiss_lo_hz = 220.0
+hiss_hi_hz = 3000.0
+hiss_tilt_db = -9.0
+# Rotating and reciprocating assembly. These are the low thumps that give an
+# engine weight; keep them low and short or they turn into a drum.
+crank_gain = 0.10              # per-firing main-bearing / big-end thump
+crank_hz = 105.0
+slap_gain = 0.08               # piston rock at TDC
+slap_hz = 210.0
+chain_gain = 0.035             # timing chain / cam-drive whine
+chain_hz = 340.0               # at idle; scales with rpm
+friction_gain = 0.022          # oil / bearing / ring shear noise
+friction_lo_hz = 55.0
+friction_hi_hz = 380.0
+
+# ---------------------------------------------------------------------------
+# [space] -- where the engine is standing (outdoor convolution reverb)
+# ---------------------------------------------------------------------------
+[space]
+enabled = true
+mix = 0.16                     # wet fraction; 0 = anechoic, 0.3 = close wall
+predelay_ms = 16.0             # time to the first reflection
+decay_s = 0.38                 # time to -60 dB
+damping_hz = 3800.0            # air/ground absorption of the tail
+early_gain = 0.55              # strength of discrete early reflections
+tail_gain = 0.72               # strength of the diffuse tail
+seed = 1                       # changes the reflection pattern
+
+# ---------------------------------------------------------------------------
+# [character] -- overall voicing
+# ---------------------------------------------------------------------------
+[character]
+brightness_db = 0.0            # presence bell, not a shelf; +3..+5 = raspy
+presence_hz = 1300.0           # centre of that bell
+presence_q = 0.8
+air_cutoff_hz = 6000.0         # end-of-chain air absorption
+air_order = 3
+aggression = 1.0               # saturation drive; 1.0 = clean
+lumpiness = 0.0                # 0..1 idle lope from a hot cam
+irregularity = 0.04            # per-cylinder amplitude scatter
+idle_floor = 0.22              # combustion level at zero load
+combustion_gain = 1.0
+ccv = 0.10                     # cycle-to-cycle variation (line broadening)
+load_sharpening = 0.55         # how much the pulse sharpens at full load
+transient_bark = 0.6           # tip-in enrichment bark
+pulse_ref_rpm = 3600.0         # pulse duration is referenced to this rpm
+pulse_min_scale = 0.40         # shortest pulse at high rpm
+
+# ---------------------------------------------------------------------------
+# [render] -- offline render / stream settings (leave these alone normally)
+# ---------------------------------------------------------------------------
+[render]
+sample_rate = 48000
+bit_depth = 16
+channels = 1
+block_size = 1024
+loop_seconds = 2.5
+loop_fade_ms = 12.0
+warmup_cycles = 3
+peak_db = -1.0
+resonator_length_s = 0.12
+kernel_taps = 1025

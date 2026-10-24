@@ -1,0 +1,36 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.pycache/
+.pytest_cache/
+_pyt/
+*.egg-info/
+
+# Build artefacts
+*.obj
+*.exp
+*.lib
+*.pyd
+tools/soundgen/_dspcore*.pyd
+build/
+dist/
+
+# Native build scratch
+tools/soundgen/native/_build.bat
+
+# IDE / OS
+.vscode/
+.idea/
+*.swp
+Thumbs.db
+.DS_Store
+
+# Local experiments / captures (kept out of the repo)
+_*.py
+_*.png
+_*.bak
+_acl-recovery/
+_tmp/
+_sg_*/
+out/

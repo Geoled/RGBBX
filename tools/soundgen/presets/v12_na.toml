@@ -1,0 +1,104 @@
+# 6.5 litre naturally aspirated V12 (8500 rpm, flagship GT).
+# Twelve firings every 720 degrees is one every 60 degrees. A V12 is really two
+# straight sixes on a common crank, so it is perfectly balanced and perfectly
+# even, and the pulse train is so dense that it stops sounding like pulses at
+# all. What is left is the pure tone of the whole system: the widest, smoothest
+# spectrum of any piston engine here, and the highest firing order, which is
+# why a V12 is described as a scream rather than a rumble.
+
+name = "V12 6.5 NA"
+seed = 20110217
+notes = "6.5 L NA V12, 8500 rpm. 60 deg firing, perfect balance, dense even spectrum."
+
+[engine]
+idle_rpm = 850.0
+redline_rpm = 8500.0
+starter_rpm = 280.0
+
+[block]
+cylinders = 12
+layout = "v"
+ignition = "spark"
+strokes = 4
+bore_mm = 95.0
+stroke_mm = 76.4
+compression = 11.8
+bank_angle_deg = 60.0
+rod_ratio = 1.70
+ve_peak_rpm_frac = 0.7
+ve_peak_value = 1.1
+ve_droop = 0.08
+
+[exhaust]
+pipe_length_m = 1.00
+pipe_temp_c = 730.0
+comb_gain = 0.58
+comb_repeats = 5
+muffler_cutoff_hz = 5400.0
+bank_asymmetry = 0.05
+runner_spread = 0.10
+modes = [
+    [79.0, 1.75, 1.00],
+    [127.0, 1.95, 0.97],
+    [206.0, 2.15, 0.94],
+    [335.0, 2.35, 0.91],
+    [550.0, 2.55, 0.87],
+    [905.0, 2.70, 0.82],
+    [1490.0, 2.85, 0.76],
+    [2460.0, 3.00, 0.67],
+    [3960.0, 3.00, 0.56],
+    [5650.0, 2.75, 0.42],
+]
+
+[intake]
+noise_gain = 0.30
+pulse_gain = 0.50
+runner_length_m = 0.34
+runner_spread = 0.09
+band_lo_hz = 300.0
+band_hi_hz = 7200.0
+modes = [
+    [122.0, 2.05, 1.00],
+    [194.0, 2.30, 0.96],
+    [306.0, 2.55, 0.92],
+    [480.0, 2.80, 0.86],
+    [760.0, 3.00, 0.79],
+    [1200.0, 3.05, 0.70],
+    [1900.0, 2.95, 0.58],
+    [3000.0, 2.65, 0.45],
+    [4750.0, 2.30, 0.33],
+]
+
+[turbo]
+enabled = false
+
+[mechanical]
+valvetrain_gain = 0.072
+valvetrain_bright_hz = 4700.0
+injector_gain = 0.025
+accessory_gain = 0.024
+accessory_hz = 255.0
+hiss_gain = 0.018
+
+[character]
+brightness_db = 4.5
+presence_hz = 2100.0
+presence_q = 0.75
+aggression = 1.40
+lumpiness = 0.0
+irregularity = 0.03
+idle_floor = 0.22
+combustion_gain = 1.10
+ccv = 0.07
+
+[render]
+sample_rate = 48000
+bit_depth = 16
+channels = 1
+block_size = 1024
+loop_seconds = 2.5
+loop_fade_ms = 14.0
+warmup_cycles = 3
+peak_db = -1.0
+resonator_length_s = 0.12
+kernel_taps = 1025

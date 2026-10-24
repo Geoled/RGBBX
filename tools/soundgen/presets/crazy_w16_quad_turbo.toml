@@ -1,0 +1,114 @@
+# QUAD-TURBO W16 8.0 — a Bugatti-style quad-turbo sixteen on four exhaust
+# notes... no, keep the madness: 8.0 W16, four turbos, 16 cylinders at a
+# 1000 rpm idle. The "crazy" one: so many cylinders the firing interval is
+# 45 degrees of crank -- smoother than any V12 yet the boost stacks four
+# blow-off pshhs on lift-off. Idle like a locomotive.
+
+name = "QUAD-TURBO W16 8.0 APEX"
+seed = 16161616
+notes = "8.0 L W16 quad-turbo. Locomotive idle, dense-as-butter firing, four blow-offs stacked."
+
+[engine]
+idle_rpm = 600.0
+redline_rpm = 7100.0
+starter_rpm = 200.0
+
+[block]
+# The layout system has no 'w': model it as a 90-degree V with 16 cylinders
+# (two narrow-angle banks per side). Firing offsets emulate the W's
+# near-continuous 45-degree intervals.
+cylinders = 16
+layout = "v"
+strokes = 4
+bore_mm = 86.0
+stroke_mm = 86.0
+compression = 9.0
+bank_angle_deg = 90.0
+rod_ratio = 1.55
+ve_peak_rpm_frac = 0.62
+ve_peak_value = 1.10
+ve_droop = 0.10
+# 16 near-even firings over 720 deg
+firing_offsets = [
+    0.000, 0.5600, 0.1250, 0.6850, 0.2500, 0.8100, 0.3750, 0.9350,
+    0.0625, 0.6250, 0.1875, 0.7500, 0.3125, 0.8750, 0.4375, 0.9975,
+]
+
+[exhaust]
+pipe_length_m = 1.00
+pipe_temp_c = 780.0
+comb_gain = 0.64
+comb_repeats = 8
+muffler_cutoff_hz = 3600.0
+bank_asymmetry = 0.12
+modes = [
+    [60.0, 1.50, 1.00],
+    [92.0, 1.70, 0.98],
+    [144.0, 1.90, 0.95],
+    [226.0, 2.10, 0.91],
+    [356.0, 2.30, 0.86],
+    [560.0, 2.45, 0.80],
+    [880.0, 2.60, 0.73],
+    [1384.0, 2.72, 0.64],
+    [2172.0, 2.80, 0.54],
+    [3400.0, 2.62, 0.45],
+    [4800.0, 2.42, 0.38],
+]
+
+[intake]
+noise_gain = 0.36
+pulse_gain = 0.48
+runner_length_m = 0.36
+band_lo_hz = 170.0
+band_hi_hz = 5800.0
+modes = [
+    [80.0, 1.64, 1.00],
+    [126.0, 1.84, 0.95],
+    [198.0, 2.04, 0.89],
+    [310.0, 2.24, 0.82],
+    [488.0, 2.44, 0.74],
+    [766.0, 2.58, 0.64],
+    [1200.0, 2.52, 0.52],
+    [1880.0, 2.34, 0.40],
+    [2900.0, 2.04, 0.30],
+]
+
+[turbo]
+enabled = true
+kind = "turbo"
+max_boost_bar = 1.80
+spool_rpm = 1500.0
+spool_span_rpm = 1400.0
+whistle_hz = 1500.0
+whistle_span_hz = 2400.0
+whistle_gain = 0.34
+whoosh_gain = 0.34
+flutter = true
+blow_off = true
+
+[mechanical]
+valvetrain_gain = 0.112
+valvetrain_bright_hz = 3000.0
+injector_gain = 0.044
+accessory_gain = 0.036
+accessory_hz = 190.0
+
+[character]
+brightness_db = 3.6
+aggression = 2.2
+lumpiness = 0.08
+irregularity = 0.04
+idle_floor = 0.32
+combustion_gain = 1.30
+
+[render]
+sample_rate = 48000
+bit_depth = 16
+channels = 1
+block_size = 1024
+loop_seconds = 2.5
+loop_fade_ms = 15.0
+warmup_cycles = 3
+peak_db = -0.5
+resonator_length_s = 0.15
+kernel_taps = 1025

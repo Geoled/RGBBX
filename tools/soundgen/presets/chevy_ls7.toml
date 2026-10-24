@@ -1,0 +1,94 @@
+# Chevrolet LS7 — 7.0 L naturally aspirated V8 (C6 Z06).
+# The largest of the LS family: 4.125 inch bores, a dry-sump high-revving
+# cam, and a much angrier, sharper bark than the old small blocks.
+
+name = "Chevrolet LS7 7.0 V8"
+seed = 20060401
+notes = "7.0 L NA LS V8. Big-bore, high-flow heads: sharper and revvier than an SBC."
+
+[engine]
+idle_rpm = 700.0
+redline_rpm = 7000.0
+starter_rpm = 230.0
+
+[block]
+cylinders = 8
+layout = "v"
+strokes = 4
+bore_mm = 104.9
+stroke_mm = 101.6
+compression = 11.0
+bank_angle_deg = 90.0
+rod_ratio = 1.60
+ve_peak_rpm_frac = 0.68
+ve_peak_value = 1.10
+ve_droop = 0.10
+firing_offsets = [0.000, 0.875, 0.375, 0.250, 0.625, 0.500, 0.750, 0.125]
+
+[exhaust]
+pipe_length_m = 1.20
+pipe_temp_c = 650.0
+comb_gain = 0.62
+comb_repeats = 5
+muffler_cutoff_hz = 3800.0
+bank_asymmetry = 0.14
+modes = [
+    [72.0, 1.55, 1.00],
+    [112.0, 1.75, 0.98],
+    [176.0, 1.95, 0.95],
+    [278.0, 2.15, 0.91],
+    [440.0, 2.35, 0.86],
+    [698.0, 2.50, 0.80],
+    [1108.0, 2.65, 0.73],
+    [1760.0, 2.75, 0.64],
+    [2795.0, 2.85, 0.54],
+    [4440.0, 2.70, 0.45],
+]
+
+[intake]
+noise_gain = 0.38
+pulse_gain = 0.50
+runner_length_m = 0.36
+band_lo_hz = 200.0
+band_hi_hz = 6200.0
+modes = [
+    [98.0, 1.70, 1.00],
+    [155.0, 1.90, 0.95],
+    [248.0, 2.10, 0.89],
+    [398.0, 2.30, 0.82],
+    [640.0, 2.50, 0.74],
+    [1030.0, 2.60, 0.64],
+    [1700.0, 2.50, 0.52],
+    [2800.0, 2.30, 0.40],
+    [4600.0, 2.00, 0.30],
+]
+
+[turbo]
+enabled = false
+
+[mechanical]
+valvetrain_gain = 0.104
+valvetrain_bright_hz = 3400.0
+injector_gain = 0.032
+accessory_gain = 0.030
+accessory_hz = 210.0
+
+[character]
+brightness_db = 4.0
+aggression = 1.75
+lumpiness = 0.14
+irregularity = 0.06
+idle_floor = 0.24
+combustion_gain = 1.20
+
+[render]
+sample_rate = 48000
+bit_depth = 16
+channels = 1
+block_size = 1024
+loop_seconds = 2.5
+loop_fade_ms = 14.0
+warmup_cycles = 3
+peak_db = -1.0
+resonator_length_s = 0.14
+kernel_taps = 1025

@@ -1,0 +1,104 @@
+# Gas turbine / jet-ish powerplant. There is no discrete firing, so the
+# voice switches to continuous broadband noise shaped by the same resonators,
+# plus a strong compressor whine whose pitch rises with spool speed.
+
+name = "Gas Turbine"
+seed = 555001
+notes = "Continuous-combustion turbine: no firing events, whine + broadband roar."
+
+[engine]
+idle_rpm = 12000.0
+redline_rpm = 42000.0
+starter_rpm = 2000.0
+
+[block]
+cylinders = 1
+layout = "turbine"
+ignition = "turbine"
+strokes = 4
+bore_mm = 200.0
+stroke_mm = 200.0
+compression = 12.0
+rod_ratio = 1.0
+
+[exhaust]
+pipe_length_m = 0.9
+pipe_temp_c = 900.0
+comb_gain = 0.35
+comb_repeats = 3
+muffler_cutoff_hz = 9000.0
+bank_asymmetry = 0.0
+modes = [
+    [120.0, 1.6, 1.00],
+    [300.0, 2.0, 0.70],
+    [900.0, 2.5, 0.45],
+    [2200.0, 3.0, 0.30],
+]
+
+[intake]
+noise_gain = 0.55
+pulse_gain = 0.05
+runner_length_m = 0.5
+band_lo_hz = 400.0
+band_hi_hz = 12000.0
+modes = [
+    [400.0, 2.0, 1.00],
+    [1200.0, 2.5, 0.70],
+    [3600.0, 3.0, 0.45],
+]
+
+[turbo]
+enabled = true
+kind = "turbo"
+max_boost_bar = 3.0
+spool_rpm = 6000.0
+spool_span_rpm = 30000.0
+whistle_hz = 1400.0
+whistle_span_hz = 3600.0
+whistle_gain = 0.22
+idle_whistle = 0.45
+whoosh_gain = 0.30
+flutter = false
+blow_off = false
+
+# Air-standard Brayton cycle.  Used by the simulator only when
+# block.layout = "turbine"; the sound above remains independent.
+[turbine]
+pressure_ratio = 12.0          # compressor pressure ratio at the redline
+idle_turbine_inlet_c = 650.0   # firing temperature at idle
+max_turbine_inlet_c = 1200.0   # firing temperature at full power
+compressor_efficiency = 0.80   # adiabatic compressor efficiency
+turbine_efficiency = 0.88      # adiabatic turbine efficiency
+combustor_efficiency = 0.98    # fraction of fuel energy reaching the gas
+mechanical_efficiency = 0.97   # bearings, seals and accessory drive
+mass_flow_kg_s = 15.0          # design air mass flow
+pressure_loss = 0.95           # pressure retained from compressor to turbine
+spool_tau_s = 1.2              # time constant when accelerating
+wind_down_tau_s = 2.0          # time constant when the fuel is cut
+
+[mechanical]
+valvetrain_gain = 0.007
+valvetrain_bright_hz = 6000.0
+injector_gain = 0.000
+accessory_gain = 0.060
+accessory_hz = 320.0
+
+[character]
+brightness_db = 2.0
+aggression = 1.2
+lumpiness = 0.0
+irregularity = 0.0
+idle_floor = 0.55
+combustion_gain = 1.0
+
+[render]
+sample_rate = 48000
+bit_depth = 16
+channels = 1
+block_size = 1024
+loop_seconds = 2.0
+loop_fade_ms = 20.0
+warmup_cycles = 2
+peak_db = -1.0
+resonator_length_s = 0.08
+kernel_taps = 1025

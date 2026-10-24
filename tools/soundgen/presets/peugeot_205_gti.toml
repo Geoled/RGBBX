@@ -1,0 +1,132 @@
+# Peugeot 205 GTI 1.9 (XU9JA) — the hot hatch that defined a generation.
+# An eight-valve, long-stroke four with a short, raspy exhaust and a lot of
+# bottom-end mechanical noise. It does not rev to the moon: the character is
+# mid-range punch and a hard-edged, slightly hollow note.
+
+name = "Peugeot 205 GTI 1.9"
+seed = 19840801
+notes = "1.9 L 8v XU9JA. Long stroke, short exhaust, gruff mid-range and a hard rasp."
+
+[engine]
+idle_rpm = 850.0
+redline_rpm = 6500.0
+starter_rpm = 240.0
+
+[block]
+cylinders = 4
+layout = "inline"
+ignition = "spark"
+strokes = 4
+bore_mm = 83.0
+stroke_mm = 88.0
+compression = 9.6
+bank_angle_deg = 0.0
+rod_ratio = 1.52
+# An old eight-valve still holds its torque well: peak VE around 3250 rpm and
+# only a small loss by 6000, where the real car makes its 96 kW.
+ve_peak_rpm_frac = 0.50
+ve_peak_value = 1.00
+ve_droop = 0.06
+
+[exhaust]
+# A short downpipe and a small silencer: the 205 GTI is loud for its size and
+# the note has a metallic "tin" quality rather than a deep boom.
+pipe_length_m = 0.92
+pipe_temp_c = 640.0
+comb_gain = 0.60
+comb_repeats = 4
+muffler_cutoff_hz = 3800.0
+bank_asymmetry = 0.0
+runner_length_m = 0.34
+runner_spread = 0.16
+runner_reflect = 0.46
+flow_noise = 0.24
+flow_burst = 0.50
+tail_noise = 0.08
+modes = [
+    [104.0, 1.95, 1.00],
+    [168.0, 2.15, 0.96],
+    [276.0, 2.35, 0.92],
+    [452.0, 2.55, 0.87],
+    [742.0, 2.70, 0.82],
+    [1218.0, 2.85, 0.75],
+    [2000.0, 2.95, 0.67],
+    [3280.0, 2.95, 0.56],
+    [4500.0, 2.75, 0.44],
+]
+
+[intake]
+noise_gain = 0.34
+pulse_gain = 0.48
+runner_length_m = 0.32
+runner_spread = 0.16
+band_lo_hz = 260.0
+band_hi_hz = 6200.0
+modes = [
+    [118.0, 1.75, 1.00],
+    [184.0, 1.95, 0.95],
+    [294.0, 2.15, 0.90],
+    [470.0, 2.35, 0.83],
+    [760.0, 2.55, 0.75],
+    [1240.0, 2.65, 0.65],
+    [2040.0, 2.60, 0.53],
+    [3380.0, 2.40, 0.41],
+    [5100.0, 2.10, 0.30],
+]
+
+[turbo]
+enabled = false
+
+[mechanical]
+# The XU has a chain-driven cam, big solid lifters and an old-school alternator:
+# plenty of mechanical presence, especially at idle.
+valvetrain_gain = 0.094
+valvetrain_bright_hz = 3600.0
+valves_per_cyl = 2             # the XU9 is an 8-valve
+injector_gain = 0.022
+accessory_gain = 0.034
+accessory_hz = 225.0
+hiss_gain = 0.022
+crank_gain = 0.14
+crank_hz = 108.0
+slap_gain = 0.11
+slap_hz = 205.0
+chain_gain = 0.042
+chain_hz = 300.0
+friction_gain = 0.030
+friction_lo_hz = 50.0
+friction_hi_hz = 360.0
+
+[space]
+# Parked on a narrow street: a little more early reflection than an open field.
+enabled = true
+mix = 0.20
+predelay_ms = 11.0
+decay_s = 0.34
+damping_hz = 3400.0
+early_gain = 0.62
+tail_gain = 0.62
+
+[character]
+brightness_db = 4.6
+presence_hz = 1500.0
+presence_q = 0.8
+aggression = 1.45
+lumpiness = 0.05
+irregularity = 0.06
+idle_floor = 0.21
+combustion_gain = 1.02
+ccv = 0.11
+load_sharpening = 0.62
+
+[render]
+sample_rate = 48000
+bit_depth = 16
+channels = 1
+block_size = 1024
+loop_seconds = 2.5
+loop_fade_ms = 12.0
+warmup_cycles = 3
+peak_db = -1.0
+resonator_length_s = 0.12
+kernel_taps = 1025

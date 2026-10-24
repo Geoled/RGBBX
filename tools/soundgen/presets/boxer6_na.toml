@@ -1,0 +1,100 @@
+# 4.0 litre naturally aspirated flat six (911 GT3 style, 9000 rpm).
+# A flat six is two opposing threes, and it is the only large engine that will
+# happily turn 9000 rpm: short stroke, huge ports, equal length headers. Nothing
+# is unbalanced, nothing is uneven -- all of the character is high frequency
+# body resonance and intake honk, which is why it howls rather than rumbles.
+
+name = "Flat-6 4.0 NA"
+seed = 20130307
+notes = "4.0 L NA flat six, 9000 rpm. Even firing, equal length headers, hard metallic howl."
+
+[engine]
+idle_rpm = 900.0
+redline_rpm = 9000.0
+starter_rpm = 260.0
+
+[block]
+cylinders = 6
+layout = "boxer"
+ignition = "spark"
+strokes = 4
+bore_mm = 102.0
+stroke_mm = 81.5
+compression = 12.5
+bank_angle_deg = 180.0
+rod_ratio = 1.68
+ve_peak_rpm_frac = 0.66
+ve_peak_value = 1.04
+ve_droop = 0.08
+
+[exhaust]
+pipe_length_m = 1.10
+pipe_temp_c = 700.0
+comb_gain = 0.58
+comb_repeats = 5
+muffler_cutoff_hz = 4800.0
+bank_asymmetry = 0.08
+runner_spread = 0.10
+modes = [
+    [86.0, 1.65, 1.00],
+    [140.0, 1.85, 0.97],
+    [232.0, 2.05, 0.94],
+    [380.0, 2.25, 0.90],
+    [625.0, 2.45, 0.85],
+    [1030.0, 2.60, 0.79],
+    [1700.0, 2.75, 0.72],
+    [2800.0, 2.90, 0.63],
+    [4450.0, 2.85, 0.52],
+    [6300.0, 2.60, 0.40],
+]
+
+[intake]
+noise_gain = 0.32
+pulse_gain = 0.50
+runner_length_m = 0.36
+runner_spread = 0.10
+band_lo_hz = 260.0
+band_hi_hz = 6800.0
+modes = [
+    [118.0, 1.90, 1.00],
+    [186.0, 2.15, 0.96],
+    [295.0, 2.40, 0.91],
+    [465.0, 2.65, 0.85],
+    [735.0, 2.85, 0.78],
+    [1160.0, 2.95, 0.68],
+    [1830.0, 2.85, 0.56],
+    [2900.0, 2.55, 0.43],
+    [4600.0, 2.20, 0.31],
+]
+
+[turbo]
+enabled = false
+
+[mechanical]
+valvetrain_gain = 0.079
+valvetrain_bright_hz = 4400.0
+injector_gain = 0.028
+accessory_gain = 0.028
+accessory_hz = 260.0
+
+[character]
+brightness_db = 4.4
+presence_hz = 1800.0
+aggression = 1.40
+lumpiness = 0.04
+irregularity = 0.05
+idle_floor = 0.22
+combustion_gain = 1.10
+ccv = 0.09
+
+[render]
+sample_rate = 48000
+bit_depth = 16
+channels = 1
+block_size = 1024
+loop_seconds = 2.5
+loop_fade_ms = 14.0
+warmup_cycles = 3
+peak_db = -1.0
+resonator_length_s = 0.13
+kernel_taps = 1025

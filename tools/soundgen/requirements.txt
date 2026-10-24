@@ -1,0 +1,14 @@
+# soundgen requirements
+#
+# The synthesizer core needs nothing beyond numpy and the Python standard
+# library (wave, tomllib, json, argparse). numpy is the only hard requirement.
+numpy>=1.24
+
+# Optional: only needed for `python -m soundgen realtime` (speaker output).
+# Offline rendering and `bench` work without it.
+# sounddevice>=0.4.6
+
+# Optional but recommended for offline export:
+# soundfile>=0.12   (correct 24-bit / multichannel WAV)
+# pyloudnorm>=0.1   (LUFS measurement in manifest)
+# scipy>=1.10        (periodic cubic interpolation in the live loop mixer)

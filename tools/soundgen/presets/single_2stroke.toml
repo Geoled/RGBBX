@@ -1,0 +1,108 @@
+# 250 cc two-stroke single (motocross / enduro).
+# A two-stroke fires on every revolution, so at any given rpm it is an octave
+# up on a four-stroke of the same size, and the exhaust pulse is a hard, short
+# blowdown rather than a burn. That, plus almost no muffling, is the whole
+# "ring-ding" character: thin, sharp and very bright.
+
+name = "Single 250 2-Stroke"
+seed = 19960117
+notes = "250 cc two-stroke single. Fires every revolution: twice the pitch, hard blowdown, barely muffled."
+
+[engine]
+idle_rpm = 1250.0
+redline_rpm = 10500.0
+starter_rpm = 300.0
+
+[block]
+cylinders = 1
+layout = "inline"
+ignition = "spark"
+strokes = 2
+bore_mm = 66.4
+stroke_mm = 72.0
+compression = 8.0
+bank_angle_deg = 0.0
+rod_ratio = 1.75
+ve_peak_rpm_frac = 0.78
+ve_peak_value = 1.08
+ve_droop = 0.08
+
+[exhaust]
+# Short, thin, hot pipe: a two-stroke runs its expansion chamber hot and its
+# whole exhaust is roughly a third of the length of a car system.
+pipe_length_m = 0.62
+pipe_temp_c = 520.0
+comb_gain = 0.62
+comb_repeats = 5
+muffler_cutoff_hz = 5200.0
+bank_asymmetry = 0.0
+# One cylinder, so there is no harmonic density to hide behind: the body
+# resonances have to carry the tone on their own, and they have to reach much
+# further up than a four's before they run out.
+modes = [
+    [118.0, 1.60, 1.00],
+    [196.0, 1.80, 0.96],
+    [330.0, 2.00, 0.92],
+    [560.0, 2.25, 0.88],
+    [930.0, 2.45, 0.84],
+    [1520.0, 2.60, 0.78],
+    [2450.0, 2.70, 0.70],
+    [3900.0, 2.65, 0.58],
+    [5600.0, 2.40, 0.44],
+]
+
+[intake]
+noise_gain = 0.44
+pulse_gain = 0.50
+runner_length_m = 0.18
+runner_spread = 0.0
+band_lo_hz = 350.0
+band_hi_hz = 7000.0
+modes = [
+    [150.0, 1.55, 1.00],
+    [250.0, 1.75, 0.94],
+    [440.0, 1.95, 0.87],
+    [780.0, 2.15, 0.79],
+    [1350.0, 2.35, 0.70],
+    [2300.0, 2.45, 0.58],
+    [3800.0, 2.30, 0.45],
+    [5800.0, 2.05, 0.32],
+]
+
+[turbo]
+enabled = false
+
+[mechanical]
+# No valves and no injectors (a reed valve and a carburettor), so the only
+# mechanical layer is the piston/gear rattle.
+valvetrain_gain = 0.000
+valvetrain_bright_hz = 4200.0
+injector_gain = 0.000
+accessory_gain = 0.030
+accessory_hz = 260.0
+hiss_gain = 0.030
+
+[character]
+brightness_db = 5.5
+presence_hz = 2100.0
+presence_q = 0.7
+aggression = 1.80
+lumpiness = 0.35
+irregularity = 0.10
+idle_floor = 0.30
+combustion_gain = 1.25
+ccv = 0.22
+load_sharpening = 0.75
+transient_bark = 1.00
+
+[render]
+sample_rate = 48000
+bit_depth = 16
+channels = 1
+block_size = 1024
+loop_seconds = 2.0
+loop_fade_ms = 10.0
+warmup_cycles = 3
+peak_db = -1.0
+resonator_length_s = 0.10
+kernel_taps = 1025

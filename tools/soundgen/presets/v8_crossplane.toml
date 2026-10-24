@@ -1,0 +1,97 @@
+# 6.0 litre cross-plane V8 (90 degree), American pushrod character.
+# Even 90 degree firing, but the two banks get slightly different pipe lengths,
+# which produces the classic uneven "burble" and low rumble.
+
+name = "V8 6.0 Cross-plane"
+seed = 19690720
+notes = "Cross-plane 90 deg V8 pushrod. Deep rumble from bank pipe asymmetry."
+
+[engine]
+idle_rpm = 650.0
+redline_rpm = 6500.0
+starter_rpm = 220.0
+
+[block]
+cylinders = 8
+layout = "v"
+strokes = 4
+bore_mm = 102.0
+stroke_mm = 92.0
+compression = 10.0
+bank_angle_deg = 90.0
+rod_ratio = 1.55
+# Ignition order 1-8-4-3-6-5-7-2 (odd cylinders on bank 0, even on bank 1), as
+# firing angles over the 720 degree cycle. The crank pins are 90 degrees apart,
+# so each *cylinder* fires at an even 90 degree interval -- but the banks do
+# not alternate. Bank 0 fires at 0, 270, 450 and 540 degrees, so the right hand
+# pipe gets two firings close together and then a long gap. That uneven bank
+# sequence, not any detuning, is the cross plane burble.
+firing_offsets = [0.000, 0.875, 0.375, 0.250, 0.625, 0.500, 0.750, 0.125]
+
+[exhaust]
+pipe_length_m = 1.35
+pipe_temp_c = 580.0
+comb_gain = 0.58
+comb_repeats = 5
+muffler_cutoff_hz = 3200.0
+bank_asymmetry = 0.18
+modes = [
+    [72.0, 1.55, 1.00],
+    [112.0, 1.75, 0.98],
+    [176.0, 1.95, 0.95],
+    [278.0, 2.15, 0.91],
+    [440.0, 2.35, 0.86],
+    [698.0, 2.50, 0.80],
+    [1108.0, 2.65, 0.73],
+    [1760.0, 2.75, 0.64],
+    [2795.0, 2.85, 0.54],
+    [4440.0, 2.60, 0.43],
+]
+
+[intake]
+noise_gain = 0.34
+pulse_gain = 0.42
+runner_length_m = 0.42
+band_lo_hz = 180.0
+band_hi_hz = 5500.0
+modes = [
+    [95.0, 1.70, 1.00],
+    [150.0, 1.90, 0.95],
+    [240.0, 2.10, 0.89],
+    [385.0, 2.30, 0.82],
+    [620.0, 2.50, 0.74],
+    [1000.0, 2.60, 0.64],
+    [1650.0, 2.50, 0.52],
+    [2700.0, 2.30, 0.40],
+    [4500.0, 2.00, 0.30],
+]
+
+[turbo]
+enabled = false
+
+[mechanical]
+valvetrain_gain = 0.101
+valvetrain_bright_hz = 3200.0
+injector_gain = 0.035
+accessory_gain = 0.035
+accessory_hz = 200.0
+
+[character]
+brightness_db = 3.5
+aggression = 1.6
+lumpiness = 0.18
+irregularity = 0.07
+idle_floor = 0.26
+combustion_gain = 1.15
+
+[render]
+sample_rate = 48000
+bit_depth = 16
+channels = 1
+block_size = 1024
+loop_seconds = 2.5
+loop_fade_ms = 14.0
+warmup_cycles = 3
+peak_db = -1.0
+resonator_length_s = 0.14
+kernel_taps = 1025

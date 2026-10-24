@@ -1,0 +1,107 @@
+# Ford Cosworth DFV — 3.0 L naturally aspirated V10... no: V8, 1967-85 F1.
+# The most successful F1 engine ever: 90-degree 3.0 V8, four valves per
+# pot, 10500+ rpm, and THE sound of 1970s Grand Prix racing. Dense even
+# firing, zero muffling, a megaphone exhaust.
+
+name = "Ford Cosworth DFV F1 V8"
+seed = 19670604
+notes = "3.0 L 90 deg NA F1 V8, 10500 rpm. Megaphone exhaust, zero muffling: the 70s GP scream."
+
+[engine]
+idle_rpm = 2000.0
+redline_rpm = 10500.0
+starter_rpm = 400.0
+
+[block]
+cylinders = 8
+layout = "v"
+strokes = 4
+bore_mm = 90.0
+stroke_mm = 58.9
+compression = 11.5
+bank_angle_deg = 90.0
+rod_ratio = 1.90
+ve_peak_rpm_frac = 0.82
+ve_peak_value = 1.18
+ve_droop = 0.04
+# flat-plane F1 crank: even 90-degree intervals
+firing_offsets = [0.000, 0.625, 0.250, 0.875, 0.125, 0.750, 0.500, 0.375]
+
+[exhaust]
+pipe_length_m = 0.60
+pipe_temp_c = 920.0
+comb_gain = 0.70
+comb_repeats = 4
+muffler_cutoff_hz = 9500.0
+bank_asymmetry = 0.03
+modes = [
+    [96.0, 1.90, 1.00],
+    [158.0, 2.10, 0.97],
+    [260.0, 2.30, 0.94],
+    [428.0, 2.50, 0.91],
+    [704.0, 2.70, 0.87],
+    [1158.0, 2.90, 0.82],
+    [1902.0, 3.10, 0.75],
+    [3126.0, 3.30, 0.66],
+    [5140.0, 3.35, 0.55],
+    [7900.0, 3.20, 0.44],
+    [10500.0, 2.95, 0.34],
+]
+
+[intake]
+noise_gain = 0.44
+pulse_gain = 0.62
+runner_length_m = 0.20
+band_lo_hz = 320.0
+band_hi_hz = 11000.0
+modes = [
+    [140.0, 2.00, 1.00],
+    [224.0, 2.20, 0.96],
+    [360.0, 2.44, 0.92],
+    [578.0, 2.68, 0.87],
+    [928.0, 2.92, 0.80],
+    [1490.0, 3.12, 0.71],
+    [2390.0, 3.20, 0.61],
+    [3830.0, 3.00, 0.49],
+    [6000.0, 2.65, 0.36],
+    [8800.0, 2.30, 0.27],
+]
+
+[turbo]
+enabled = false
+
+[mechanical]
+valvetrain_gain = 0.058
+valvetrain_bright_hz = 7200.0
+injector_gain = 0.016
+accessory_gain = 0.014
+accessory_hz = 340.0
+
+[character]
+brightness_db = 6.5
+presence_hz = 2800.0
+presence_q = 0.65
+air_cutoff_hz = 9500.0
+air_order = 2
+aggression = 1.7
+lumpiness = 0.0
+irregularity = 0.022
+idle_floor = 0.10
+combustion_gain = 1.20
+ccv = 0.04
+load_sharpening = 0.70
+transient_bark = 0.90
+pulse_ref_rpm = 5200.0
+pulse_min_scale = 0.28
+
+[render]
+sample_rate = 48000
+bit_depth = 16
+channels = 1
+block_size = 1024
+loop_seconds = 2.5
+loop_fade_ms = 10.0
+warmup_cycles = 3
+peak_db = -1.0
+resonator_length_s = 0.08
+kernel_taps = 1025

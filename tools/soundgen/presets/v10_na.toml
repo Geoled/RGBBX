@@ -1,0 +1,103 @@
+# 5.2 litre naturally aspirated V10 (8500 rpm, supercar).
+# Ten cylinders fire every 72 degrees. Two things follow from that: the pulse
+# train is dense enough that the gaps between bangs stop being audible, and the
+# firing frequency itself is already several hundred hertz, so the engine's
+# energy sits where a smaller engine's formants do. That is why a V10 sounds
+# like a saw blade rather than a drum.
+
+name = "V10 5.2 NA"
+seed = 20070208
+notes = "5.2 L NA V10, 8500 rpm. Dense 72 deg firing, high firing order, metallic scream."
+
+[engine]
+idle_rpm = 900.0
+redline_rpm = 8500.0
+starter_rpm = 280.0
+
+[block]
+cylinders = 10
+layout = "v"
+ignition = "spark"
+strokes = 4
+bore_mm = 84.5
+stroke_mm = 92.8
+compression = 12.7
+bank_angle_deg = 90.0
+rod_ratio = 1.65
+ve_peak_rpm_frac = 0.7
+ve_peak_value = 1.1
+ve_droop = 0.08
+
+[exhaust]
+pipe_length_m = 1.00
+pipe_temp_c = 720.0
+comb_gain = 0.58
+comb_repeats = 5
+muffler_cutoff_hz = 5200.0
+bank_asymmetry = 0.06
+runner_spread = 0.12
+modes = [
+    [82.0, 1.70, 1.00],
+    [132.0, 1.90, 0.97],
+    [215.0, 2.10, 0.94],
+    [350.0, 2.30, 0.91],
+    [575.0, 2.50, 0.87],
+    [945.0, 2.65, 0.82],
+    [1560.0, 2.80, 0.75],
+    [2580.0, 2.95, 0.66],
+    [4150.0, 2.95, 0.55],
+    [5900.0, 2.70, 0.41],
+]
+
+[intake]
+noise_gain = 0.32
+pulse_gain = 0.48
+runner_length_m = 0.34
+runner_spread = 0.10
+band_lo_hz = 280.0
+band_hi_hz = 7000.0
+modes = [
+    [126.0, 2.00, 1.00],
+    [200.0, 2.25, 0.96],
+    [315.0, 2.50, 0.92],
+    [495.0, 2.75, 0.86],
+    [785.0, 2.95, 0.79],
+    [1240.0, 3.00, 0.69],
+    [1960.0, 2.90, 0.57],
+    [3100.0, 2.60, 0.44],
+    [4900.0, 2.25, 0.32],
+]
+
+[turbo]
+enabled = false
+
+[mechanical]
+valvetrain_gain = 0.079
+valvetrain_bright_hz = 4600.0
+injector_gain = 0.028
+accessory_gain = 0.026
+accessory_hz = 250.0
+hiss_gain = 0.018
+
+[character]
+brightness_db = 4.6
+presence_hz = 2000.0
+presence_q = 0.75
+aggression = 1.45
+lumpiness = 0.0
+irregularity = 0.04
+idle_floor = 0.22
+combustion_gain = 1.10
+ccv = 0.08
+
+[render]
+sample_rate = 48000
+bit_depth = 16
+channels = 1
+block_size = 1024
+loop_seconds = 2.5
+loop_fade_ms = 14.0
+warmup_cycles = 3
+peak_db = -1.0
+resonator_length_s = 0.12
+kernel_taps = 1025

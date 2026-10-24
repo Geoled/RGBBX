@@ -1,0 +1,102 @@
+# 3.0 litre naturally aspirated inline six (high revving, individual throttle
+# bodies). Six cylinders in line is the smoothest piston layout there is: even
+# 120 degree firing, perfect primary and secondary balance, no beat at all.
+# What is left when the roughness is gone is the intake: long equal runners
+# resonating together, which is why an I6 sounds like one clean metallic note
+# rather than a collection of pulses.
+
+name = "I6 3.0 NA"
+seed = 20011005
+notes = "3.0 L NA inline six, 8000 rpm. Dead smooth, intake resonance dominated, metallic."
+
+[engine]
+idle_rpm = 800.0
+redline_rpm = 8000.0
+starter_rpm = 240.0
+
+[block]
+cylinders = 6
+layout = "inline"
+ignition = "spark"
+strokes = 4
+bore_mm = 87.0
+stroke_mm = 84.0
+compression = 11.5
+bank_angle_deg = 0.0
+rod_ratio = 1.65
+ve_peak_rpm_frac = 0.66
+ve_peak_value = 1.06
+ve_droop = 0.08
+
+[exhaust]
+pipe_length_m = 1.22
+pipe_temp_c = 640.0
+comb_gain = 0.56
+comb_repeats = 5
+muffler_cutoff_hz = 4400.0
+bank_asymmetry = 0.0
+runner_spread = 0.12
+modes = [
+    [94.0, 1.65, 1.00],
+    [152.0, 1.85, 0.97],
+    [250.0, 2.05, 0.93],
+    [410.0, 2.25, 0.89],
+    [675.0, 2.45, 0.84],
+    [1110.0, 2.60, 0.78],
+    [1830.0, 2.75, 0.71],
+    [3010.0, 2.85, 0.61],
+    [4950.0, 2.70, 0.49],
+]
+
+[intake]
+noise_gain = 0.30
+pulse_gain = 0.52
+# Long, near-equal runners: this is the layer that gives the engine its voice.
+runner_length_m = 0.44
+runner_spread = 0.10
+runner_reflect = 0.42
+band_lo_hz = 220.0
+band_hi_hz = 6500.0
+modes = [
+    [108.0, 2.00, 1.00],
+    [170.0, 2.30, 0.97],
+    [268.0, 2.60, 0.93],
+    [420.0, 2.90, 0.88],
+    [660.0, 3.10, 0.82],
+    [1040.0, 3.20, 0.73],
+    [1640.0, 3.10, 0.61],
+    [2600.0, 2.80, 0.47],
+    [4100.0, 2.40, 0.33],
+]
+
+[turbo]
+enabled = false
+
+[mechanical]
+valvetrain_gain = 0.072
+valvetrain_bright_hz = 4100.0
+injector_gain = 0.025
+accessory_gain = 0.026
+accessory_hz = 245.0
+
+[character]
+brightness_db = 4.3
+presence_hz = 1650.0
+aggression = 1.35
+lumpiness = 0.0
+irregularity = 0.035
+idle_floor = 0.20
+combustion_gain = 1.05
+ccv = 0.08
+
+[render]
+sample_rate = 48000
+bit_depth = 16
+channels = 1
+block_size = 1024
+loop_seconds = 2.5
+loop_fade_ms = 14.0
+warmup_cycles = 3
+peak_db = -1.0
+resonator_length_s = 0.14
+kernel_taps = 1025

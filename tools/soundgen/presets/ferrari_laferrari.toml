@@ -1,0 +1,105 @@
+# Ferrari LaFerrari — 6.3 L NA V12 hybrid hypercar.
+# The F140FE: a 65-degree 6.3 V12 that revs to 9250, with the HY-KERS
+# electric motor filling torque below 3000 rpm. Acoustically the purest
+# modern Ferrari: no turbos at all, just trumpet intake and a wail.
+
+name = "Ferrari LaFerrari 6.3 V12"
+seed = 20130305
+notes = "6.3 L 65 deg NA V12, 9250 rpm. Trumpet intake, no turbos: the pure wail."
+
+[engine]
+idle_rpm = 900.0
+redline_rpm = 9250.0
+starter_rpm = 300.0
+
+[block]
+cylinders = 12
+layout = "v"
+strokes = 4
+bore_mm = 94.0
+stroke_mm = 75.2
+compression = 13.5
+bank_angle_deg = 65.0
+rod_ratio = 1.74
+ve_peak_rpm_frac = 0.76
+ve_peak_value = 1.15
+ve_droop = 0.06
+
+[exhaust]
+pipe_length_m = 0.90
+pipe_temp_c = 860.0
+comb_gain = 0.65
+comb_repeats = 6
+muffler_cutoff_hz = 7000.0
+bank_asymmetry = 0.05
+modes = [
+    [86.0, 1.76, 1.00],
+    [138.0, 1.96, 0.97],
+    [224.0, 2.16, 0.94],
+    [364.0, 2.36, 0.91],
+    [588.0, 2.56, 0.87],
+    [950.0, 2.76, 0.82],
+    [1530.0, 2.96, 0.75],
+    [2470.0, 3.16, 0.66],
+    [3980.0, 3.22, 0.55],
+    [6100.0, 3.08, 0.44],
+    [7600.0, 2.92, 0.36],
+]
+
+[intake]
+noise_gain = 0.42
+pulse_gain = 0.58
+runner_length_m = 0.25
+band_lo_hz = 290.0
+band_hi_hz = 9600.0
+modes = [
+    [128.0, 1.90, 1.00],
+    [202.0, 2.10, 0.96],
+    [320.0, 2.34, 0.92],
+    [506.0, 2.58, 0.87],
+    [800.0, 2.84, 0.80],
+    [1265.0, 3.04, 0.71],
+    [2000.0, 3.12, 0.61],
+    [3150.0, 2.92, 0.49],
+    [4950.0, 2.58, 0.36],
+    [7000.0, 2.22, 0.27],
+]
+
+[turbo]
+enabled = false
+
+[mechanical]
+valvetrain_gain = 0.066
+valvetrain_bright_hz = 6000.0
+injector_gain = 0.022
+accessory_gain = 0.020
+accessory_hz = 290.0
+
+[character]
+brightness_db = 5.8
+presence_hz = 2450.0
+presence_q = 0.69
+air_cutoff_hz = 7900.0
+air_order = 2
+aggression = 1.58
+lumpiness = 0.0
+irregularity = 0.028
+idle_floor = 0.17
+combustion_gain = 1.13
+ccv = 0.05
+load_sharpening = 0.62
+transient_bark = 0.82
+pulse_ref_rpm = 4500.0
+pulse_min_scale = 0.33
+
+[render]
+sample_rate = 48000
+bit_depth = 16
+channels = 1
+block_size = 1024
+loop_seconds = 2.5
+loop_fade_ms = 12.0
+warmup_cycles = 3
+peak_db = -1.0
+resonator_length_s = 0.09
+kernel_taps = 1025

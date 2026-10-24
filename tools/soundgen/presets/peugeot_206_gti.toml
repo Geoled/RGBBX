@@ -1,0 +1,125 @@
+# Peugeot 206 GTI 180 (EW10J4S) — the high-output 2.0 litre sixteen-valve.
+# Compared with the 205 it is smoother and revvier: four valves per cylinder,
+# a variable-length intake and a freer exhaust give a harder top-end and a much
+# cleaner, more modern rasp.
+
+name = "Peugeot 206 GTI 180"
+seed = 20010914
+notes = "2.0 L 16v EW10J4S. 177 hp, 7300 rpm. Modern rasp with a strong top end."
+
+[engine]
+idle_rpm = 850.0
+redline_rpm = 7300.0
+starter_rpm = 250.0
+
+[block]
+cylinders = 4
+layout = "inline"
+ignition = "spark"
+strokes = 4
+bore_mm = 85.0
+stroke_mm = 88.0
+compression = 11.0
+bank_angle_deg = 0.0
+rod_ratio = 1.58
+# Variable-length intake: broad torque, still pulling at the 7300 rpm limiter.
+ve_peak_rpm_frac = 0.64
+ve_peak_value = 1.02
+ve_droop = 0.08
+
+[exhaust]
+pipe_length_m = 1.06
+pipe_temp_c = 680.0
+comb_gain = 0.58
+comb_repeats = 4
+muffler_cutoff_hz = 4400.0
+bank_asymmetry = 0.0
+runner_length_m = 0.40
+runner_spread = 0.13
+runner_reflect = 0.40
+flow_noise = 0.26
+flow_burst = 0.58
+tail_noise = 0.08
+modes = [
+    [98.0, 1.85, 1.00],
+    [160.0, 2.05, 0.96],
+    [266.0, 2.25, 0.92],
+    [438.0, 2.45, 0.88],
+    [724.0, 2.60, 0.83],
+    [1196.0, 2.75, 0.77],
+    [1972.0, 2.90, 0.69],
+    [3250.0, 2.95, 0.58],
+    [4700.0, 2.85, 0.47],
+]
+
+[intake]
+noise_gain = 0.36
+pulse_gain = 0.52
+runner_length_m = 0.36
+runner_spread = 0.12
+band_lo_hz = 280.0
+band_hi_hz = 7000.0
+modes = [
+    [112.0, 1.70, 1.00],
+    [176.0, 1.90, 0.95],
+    [286.0, 2.10, 0.90],
+    [462.0, 2.30, 0.84],
+    [750.0, 2.50, 0.76],
+    [1240.0, 2.60, 0.66],
+    [2050.0, 2.55, 0.54],
+    [3420.0, 2.35, 0.42],
+    [5300.0, 2.10, 0.31],
+]
+
+[turbo]
+enabled = false
+
+[mechanical]
+valvetrain_gain = 0.090
+valvetrain_bright_hz = 4300.0
+injector_gain = 0.028
+accessory_gain = 0.028
+accessory_hz = 245.0
+hiss_gain = 0.019
+crank_gain = 0.10
+crank_hz = 112.0
+slap_gain = 0.08
+slap_hz = 218.0
+chain_gain = 0.038
+chain_hz = 330.0
+friction_gain = 0.024
+friction_lo_hz = 58.0
+friction_hi_hz = 400.0
+
+[space]
+enabled = true
+mix = 0.17
+predelay_ms = 14.0
+decay_s = 0.36
+damping_hz = 3600.0
+early_gain = 0.58
+tail_gain = 0.66
+
+[character]
+brightness_db = 4.8
+presence_hz = 1650.0
+presence_q = 0.8
+aggression = 1.50
+lumpiness = 0.02
+irregularity = 0.045
+idle_floor = 0.21
+combustion_gain = 1.04
+ccv = 0.09
+load_sharpening = 0.60
+
+[render]
+sample_rate = 48000
+bit_depth = 16
+channels = 1
+block_size = 1024
+loop_seconds = 2.5
+loop_fade_ms = 12.0
+warmup_cycles = 3
+peak_db = -1.0
+resonator_length_s = 0.12
+kernel_taps = 1025

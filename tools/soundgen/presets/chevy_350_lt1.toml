@@ -1,0 +1,92 @@
+# Chevrolet Small-Block 350 (5.7 L) — the LT1-era cross-plane V8.
+# The archetype American small block: 90-degree cross-plane crank, 4-inch
+# bore, mild cam, deep single-plane intake. Sounds like a muscle car that
+# idles at a rumble and pulls hard to a modest 5500.
+
+name = "Chevrolet 350 LT1 V8"
+seed = 19550101
+notes = "5.7 L cross-plane SBC. Classic deep American burble, 1-8-4-3-6-5-7-2 firing."
+
+[engine]
+idle_rpm = 650.0
+redline_rpm = 5500.0
+starter_rpm = 220.0
+
+[block]
+cylinders = 8
+layout = "v"
+strokes = 4
+bore_mm = 101.6
+stroke_mm = 88.4
+compression = 10.4
+bank_angle_deg = 90.0
+rod_ratio = 1.59
+firing_offsets = [0.000, 0.875, 0.375, 0.250, 0.625, 0.500, 0.750, 0.125]
+
+[exhaust]
+pipe_length_m = 1.45
+pipe_temp_c = 560.0
+comb_gain = 0.60
+comb_repeats = 5
+muffler_cutoff_hz = 2900.0
+bank_asymmetry = 0.20
+modes = [
+    [68.0, 1.50, 1.00],
+    [104.0, 1.70, 0.98],
+    [160.0, 1.90, 0.95],
+    [252.0, 2.10, 0.91],
+    [398.0, 2.30, 0.86],
+    [630.0, 2.45, 0.80],
+    [1000.0, 2.60, 0.73],
+    [1585.0, 2.70, 0.64],
+    [2518.0, 2.80, 0.53],
+    [3900.0, 2.55, 0.42],
+]
+
+[intake]
+noise_gain = 0.36
+pulse_gain = 0.44
+runner_length_m = 0.45
+band_lo_hz = 170.0
+band_hi_hz = 5200.0
+modes = [
+    [90.0, 1.65, 1.00],
+    [142.0, 1.85, 0.95],
+    [225.0, 2.05, 0.89],
+    [360.0, 2.25, 0.82],
+    [580.0, 2.45, 0.74],
+    [930.0, 2.55, 0.64],
+    [1550.0, 2.45, 0.52],
+    [2550.0, 2.25, 0.40],
+    [4200.0, 1.95, 0.30],
+]
+
+[turbo]
+enabled = false
+
+[mechanical]
+valvetrain_gain = 0.108
+valvetrain_bright_hz = 3000.0
+injector_gain = 0.034
+accessory_gain = 0.038
+accessory_hz = 190.0
+
+[character]
+brightness_db = 3.0
+aggression = 1.5
+lumpiness = 0.20
+irregularity = 0.07
+idle_floor = 0.28
+combustion_gain = 1.18
+
+[render]
+sample_rate = 48000
+bit_depth = 16
+channels = 1
+block_size = 1024
+loop_seconds = 2.5
+loop_fade_ms = 14.0
+warmup_cycles = 3
+peak_db = -1.0
+resonator_length_s = 0.15
+kernel_taps = 1025

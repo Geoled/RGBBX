@@ -1,0 +1,106 @@
+# CHRYSLER HELLCAT ON NITROUS — 6.2 L supercharged HEMI, 300 shot, open cutouts.
+# The "crazy" build: a Hellcat with the mufflers deleted, a 300 hp nitrous
+# hit wired to a horn button, and wastegates plumbed as straight pipes.
+# Definitionally too much. Firing unevenness deliberately raised (drag cam).
+
+name = "HELLCAT ON NITROUS 300shot"
+seed = 66601130
+notes = "6.2 blower HEMI + 300 shot + open cutouts. Too much, on purpose."
+
+[engine]
+idle_rpm = 750.0
+redline_rpm = 6400.0
+starter_rpm = 230.0
+
+[block]
+cylinders = 8
+layout = "v"
+strokes = 4
+bore_mm = 103.9
+stroke_mm = 90.9
+compression = 9.5
+bank_angle_deg = 90.0
+rod_ratio = 1.57
+ve_peak_rpm_frac = 0.48
+ve_peak_value = 1.12
+ve_droop = 0.14
+# drag-race cam: wild overlap makes the banks breathe unevenly
+firing_offsets = [0.000, 0.885, 0.365, 0.255, 0.640, 0.490, 0.760, 0.120]
+
+[exhaust]
+pipe_length_m = 0.80
+pipe_temp_c = 880.0
+comb_gain = 0.72
+comb_repeats = 5
+muffler_cutoff_hz = 4200.0
+bank_asymmetry = 0.30
+modes = [
+    [80.0, 1.65, 1.00],
+    [128.0, 1.85, 0.98],
+    [205.0, 2.05, 0.95],
+    [328.0, 2.25, 0.91],
+    [524.0, 2.45, 0.86],
+    [836.0, 2.60, 0.80],
+    [1332.0, 2.75, 0.73],
+    [2124.0, 2.85, 0.64],
+    [3384.0, 2.85, 0.53],
+    [5000.0, 2.65, 0.44],
+]
+
+[intake]
+noise_gain = 0.46
+pulse_gain = 0.52
+runner_length_m = 0.28
+band_lo_hz = 200.0
+band_hi_hz = 6800.0
+modes = [
+    [104.0, 1.75, 1.00],
+    [166.0, 1.95, 0.95],
+    [264.0, 2.15, 0.89],
+    [420.0, 2.35, 0.82],
+    [668.0, 2.55, 0.74],
+    [1060.0, 2.65, 0.64],
+    [1680.0, 2.55, 0.52],
+    [2660.0, 2.35, 0.40],
+    [4300.0, 2.05, 0.30],
+]
+
+[turbo]
+enabled = true
+kind = "supercharger"
+max_boost_bar = 1.15
+spool_rpm = 800.0
+spool_span_rpm = 400.0
+whistle_hz = 1100.0
+whistle_span_hz = 900.0
+whistle_gain = 0.40
+whoosh_gain = 0.24
+flutter = true
+blow_off = true
+
+[mechanical]
+valvetrain_gain = 0.128
+valvetrain_bright_hz = 3400.0
+injector_gain = 0.048
+accessory_gain = 0.044
+accessory_hz = 210.0
+
+[character]
+brightness_db = 5.0
+aggression = 2.6
+lumpiness = 0.30
+irregularity = 0.12
+idle_floor = 0.30
+combustion_gain = 1.35
+
+[render]
+sample_rate = 48000
+bit_depth = 16
+channels = 1
+block_size = 1024
+loop_seconds = 2.5
+loop_fade_ms = 14.0
+warmup_cycles = 3
+peak_db = -0.5
+resonator_length_s = 0.13
+kernel_taps = 1025

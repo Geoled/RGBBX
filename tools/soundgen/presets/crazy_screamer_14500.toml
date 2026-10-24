@@ -1,0 +1,104 @@
+# 36-CHAINSaw SWAP — a 4-cylinder bike engine with 36 expansion chambers.
+# The "crazy" one: imagine a 1.2 L four stroked to 14,500 rpm through
+# organ-pipe expansion chambers, as if a chainsaw married a two-stroke GP
+# bike. Peak everything: brightness, aggression, irregularity.
+
+name = "CHRONO-BIKE 1.2 14.5k SCREAMER"
+seed = 145000145
+notes = "1.2 L four at 14,500 rpm with expansion-chamber organ pipes. A chainsaw that took acid."
+
+[engine]
+idle_rpm = 1600.0
+redline_rpm = 14500.0
+starter_rpm = 500.0
+
+[block]
+cylinders = 4
+layout = "inline"
+strokes = 4
+bore_mm = 81.0
+stroke_mm = 58.0
+compression = 13.0
+rod_ratio = 2.05
+ve_peak_rpm_frac = 0.85
+ve_peak_value = 1.18
+ve_droop = 0.03
+
+[exhaust]
+pipe_length_m = 0.55
+pipe_temp_c = 940.0
+comb_gain = 0.74
+comb_repeats = 2
+muffler_cutoff_hz = 11000.0
+bank_asymmetry = 0.0
+modes = [
+    [150.0, 2.20, 1.00],
+    [255.0, 2.40, 0.97],
+    [432.0, 2.60, 0.94],
+    [735.0, 2.80, 0.91],
+    [1248.0, 3.00, 0.87],
+    [2120.0, 3.20, 0.82],
+    [3600.0, 3.40, 0.75],
+    [6110.0, 3.45, 0.66],
+    [9300.0, 3.30, 0.55],
+    [13000.0, 3.05, 0.44],
+    [16000.0, 2.75, 0.34],
+]
+
+[intake]
+noise_gain = 0.50
+pulse_gain = 0.66
+runner_length_m = 0.16
+band_lo_hz = 380.0
+band_hi_hz = 13000.0
+modes = [
+    [180.0, 2.10, 1.00],
+    [300.0, 2.32, 0.96],
+    [500.0, 2.56, 0.92],
+    [830.0, 2.80, 0.87],
+    [1380.0, 3.04, 0.80],
+    [2290.0, 3.22, 0.71],
+    [3800.0, 3.30, 0.61],
+    [6300.0, 3.10, 0.49],
+    [9800.0, 2.75, 0.36],
+    [13000.0, 2.40, 0.27],
+]
+
+[turbo]
+enabled = false
+
+[mechanical]
+valvetrain_gain = 0.070
+valvetrain_bright_hz = 8200.0
+injector_gain = 0.014
+accessory_gain = 0.016
+accessory_hz = 420.0
+
+[character]
+brightness_db = 7.0
+presence_hz = 3200.0
+presence_q = 0.60
+air_cutoff_hz = 11000.0
+air_order = 2
+aggression = 1.9
+lumpiness = 0.0
+irregularity = 0.02
+idle_floor = 0.08
+combustion_gain = 1.22
+ccv = 0.04
+load_sharpening = 0.75
+transient_bark = 0.95
+pulse_ref_rpm = 7000.0
+pulse_min_scale = 0.24
+
+[render]
+sample_rate = 48000
+bit_depth = 16
+channels = 1
+block_size = 1024
+loop_seconds = 2.0
+loop_fade_ms = 8.0
+warmup_cycles = 3
+peak_db = -1.0
+resonator_length_s = 0.06
+kernel_taps = 1025

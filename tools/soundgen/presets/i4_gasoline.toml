@@ -1,0 +1,94 @@
+# Reference naturally aspirated 2.0 litre four cylinder (gasoline).
+# This is the baseline voice: a clean, even-firing inline four.
+
+name = "I4 Gasoline 2.0 NA"
+seed = 20050412
+notes = "Reference NA 2.0 L I4. Even firing, modest exhaust, stock-ish voicing."
+
+[engine]
+idle_rpm = 850.0
+redline_rpm = 7200.0
+starter_rpm = 260.0
+
+[block]
+cylinders = 4
+layout = "inline"
+strokes = 4
+bore_mm = 87.0
+stroke_mm = 87.0
+compression = 10.5
+bank_angle_deg = 0.0
+rod_ratio = 1.62
+
+[exhaust]
+pipe_length_m = 1.10
+pipe_temp_c = 620.0
+comb_gain = 0.58
+comb_repeats = 4
+muffler_cutoff_hz = 4200.0
+bank_asymmetry = 0.0
+# A real exhaust is two things at once: a dense bed of broad body/plenum
+# resonances, and the narrow standing-wave lines of the pipe itself.  The
+# comb delay supplies the narrow lines, so the mode bank here is the broad
+# bed -- Q rises with frequency because a real pipe loses proportionally less
+# energy per cycle higher up, which is what keeps the rasp alive to ~4 kHz
+# instead of collapsing into a single-note boom.
+modes = [
+    [100.0, 1.80, 1.00],
+    [165.0, 2.00, 0.96],
+    [272.0, 2.20, 0.92],
+    [448.0, 2.40, 0.88],
+    [738.0, 2.55, 0.83],
+    [1215.0, 2.70, 0.77],
+    [2000.0, 2.85, 0.70],
+    [3300.0, 2.95, 0.60],
+    [4400.0, 2.80, 0.50],
+]
+
+[intake]
+noise_gain = 0.30
+pulse_gain = 0.45
+runner_length_m = 0.35
+band_lo_hz = 250.0
+band_hi_hz = 6500.0
+modes = [
+    [110.0, 1.60, 1.00],
+    [175.0, 1.80, 0.95],
+    [280.0, 2.00, 0.89],
+    [450.0, 2.20, 0.82],
+    [730.0, 2.40, 0.74],
+    [1200.0, 2.50, 0.64],
+    [2000.0, 2.50, 0.53],
+    [3400.0, 2.30, 0.42],
+    [5200.0, 2.00, 0.32],
+]
+
+[turbo]
+enabled = false
+
+[mechanical]
+valvetrain_gain = 0.079
+valvetrain_bright_hz = 3800.0
+injector_gain = 0.025
+accessory_gain = 0.030
+accessory_hz = 240.0
+
+[character]
+brightness_db = 4.0
+aggression = 1.35
+lumpiness = 0.0
+irregularity = 0.05
+idle_floor = 0.22
+combustion_gain = 1.0
+
+[render]
+sample_rate = 48000
+bit_depth = 16
+channels = 1
+block_size = 1024
+loop_seconds = 2.5
+loop_fade_ms = 12.0
+warmup_cycles = 3
+peak_db = -1.0
+resonator_length_s = 0.12
+kernel_taps = 1025
