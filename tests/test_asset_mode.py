@@ -116,9 +116,16 @@ def test_player_survives_a_full_rpm_sweep_without_clicks() -> None:
 
 
 def test_engine_audio_asset_mode_produces_sound() -> None:
-    """End to end: EngineAudio in asset mode renders a legal bed from the bank."""
+    """End to end: EngineAudio in asset mode renders a legal bed from the bank.
+
+    No ``prepare()`` call: the live path never calls it either. The callback
+    must self-prepare once the bank is ready -- the silence regression was
+    exactly this check guarding an unprimed player forever (shipped, heard
+    as "no sound at all", caught only because the live path was re-tested
+    without the test harness's own priming).
+    """
     audio = EngineAudio(_preset("i4_gasoline"), enabled=False, mode="assets")
-    audio.player.prepare()
+    assert not audio.player.ready, "test premise: player starts unprimed"
     audio.update(3500.0, 0.9, 0.9, 0.0, 0.0, 12.5, 0.6, 400.0)
     out = np.zeros((128, 2), dtype=np.int16)
     worst = 0
@@ -128,3 +135,30 @@ def test_engine_audio_asset_mode_produces_sound() -> None:
         worst = max(worst, int(np.abs(out).max()))
     assert worst > 3000, "asset mode produced silence"
     assert worst <= 32767
+
+
+def test_asset_mode_silent_until_bank_ready_then_fades_in() -> None:
+    """Before the bank is ready the callback emits zeros; the entry fades.
+
+    The GUI plays silence during the background render (a second or two on
+    small engines), then the bed fades in over ~150 ms -- never a hard cut.
+    """
+    preset = _preset("i4_gasoline")
+    bank = LoopBank(preset, SR)
+    player = LoopPlayer(bank, SR)
+    audio = EngineAudio(preset, enabled=False, mode="assets")
+    # replace the built-in (already-built) bank with a fresh, not-ready one
+    audio.bank = bank
+    audio.player = player
+    audio.update(3000.0, 0.5, 0.5, 0.0, 0.0, 5.0, 0.5, 300.0)
+    out = np.zeros((128, 2), dtype=np.int16)
+    audio._produce_assets(out)
+    assert int(np.abs(out).max()) == 0, "must be silent before the bank exists"
+    bank.build_blocking()
+    audio._produce_assets(out)
+    first = int(np.abs(out).max())
+    assert 0 < first, "no sound after the bank became ready"
+    # fade-in: later blocks are louder than the first
+    for _ in range(20):
+        audio._produce_assets(out)
+    assert int(np.abs(out).max()) > first

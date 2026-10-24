@@ -139,6 +139,7 @@ class EngineAudio:
         self.player: LoopPlayer | None = None
         self._bank_warm = 0.0  # fade-in progress 0..1
         self._limiter_level = 0.0
+        self._bed_scratch: np.ndarray | None = None
 
         self._lock = threading.Lock()
         # (rpm, load, throttle, boost, knock, crank_cycles, torque_pulse, pipe_temp)
@@ -499,9 +500,22 @@ class EngineAudio:
             self._triggers = []
 
         player = self.player
-        if player is None or not player.ready or not self.bank.entries:
+        if player is None or not self.bank.entries:
             out.fill(0)
             return
+        if not player.ready:
+            # The bank just finished rendering in the background: the
+            # callback is the first code that runs after it, so THIS is
+            # where the player gets prepared. (The live path never calls
+            # prepare() explicitly -- the silence bug was exactly this
+            # check guarding an unprimed player forever.)
+            if not self.bank.ready.is_set():
+                out.fill(0)
+                return
+            player.set_state(
+                rpm, load, throttle, torque_pulse, pipe_temp_c, self._limiter_level
+            )
+            player.prepare()
         # Bank just became ready: fade in over ~150 ms so the entry is not
         # a hard cut from silence.
         if self._bank_warm < 1.0:
@@ -512,7 +526,10 @@ class EngineAudio:
         player.set_state(
             rpm, load, throttle, torque_pulse, pipe_temp_c, self._limiter_level
         )
-        bed = np.zeros(n, dtype=np.float64)
+        if self._bed_scratch is None or self._bed_scratch.size < n:
+            self._bed_scratch = np.zeros(n, dtype=np.float64)
+        bed = self._bed_scratch[:n]
+        bed.fill(0.0)
         player.produce(n, bed)
         bed *= self._bank_warm
 
@@ -538,7 +555,7 @@ class EngineAudio:
         np.clip(bed, -1.0, 1.0, out=bed)
         pcm = np.rint(bed * 32767.0).astype(np.int16)
         for ch in range(out.shape[1]):
-            out[:, ch] = pcm
+            out[:, ch] = pcm[:n]
 
     def set_limiter(self, level: float) -> None:
         """Publish the rev-limiter cut state (0..1) for the limiter layer."""
