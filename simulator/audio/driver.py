@@ -37,6 +37,8 @@ from soundgen.config import Preset  # noqa: E402
 from soundgen.events import events_for, render_event  # noqa: E402
 from soundgen.voice import EngineVoice, calibrate_gain  # noqa: E402
 
+from .loopbank import LoopBank  # noqa: E402
+from .loopplayer import LoopPlayer  # noqa: E402
 from .sounddevice_backend import SoundDeviceStream  # noqa: E402
 from .winmm import WaveOutStream  # noqa: E402
 
@@ -106,6 +108,7 @@ class EngineAudio:
         preload: dict[str, int] | None = None,
         audio_backend: str = "auto",
         audio_device: int | str | None = None,
+        mode: str = "assets",
     ):
         self.preset = preset
         self.sr = int(sr)
@@ -115,6 +118,11 @@ class EngineAudio:
         self.enabled = bool(enabled)
         self.audio_backend = str(audio_backend or "auto").lower()
         self.audio_device = audio_device
+        # Sound source: "assets" plays the background-rendered loop bank
+        # (constant ~40 us callbacks, no synthesis in the audio thread);
+        # "procedural" runs the full EngineVoice in the callback (offline
+        # renders, tests, and whoever wants the live path back).
+        self.mode = str(mode)
         # 2 channels: the voice's process_stereo() pans the exhaust banks
         # (a V8 keeps its two-pipe width); mono devices get a duplicated
         # frame and lose only the width, nothing else.
@@ -126,6 +134,11 @@ class EngineAudio:
         self.error: str | None = None
         self.warnings: list[str] = []
         self.gain = 1.0
+        # asset-mode state
+        self.bank: LoopBank | None = None
+        self.player: LoopPlayer | None = None
+        self._bank_warm = 0.0  # fade-in progress 0..1
+        self._limiter_level = 0.0
 
         self._lock = threading.Lock()
         # (rpm, load, throttle, boost, knock, crank_cycles, torque_pulse, pipe_temp)
@@ -147,40 +160,78 @@ class EngineAudio:
         self._loops: dict[str, list] = {}  # [samples, cursor, gain, optional spline]
         self._shot_index = 0
 
-        if self.enabled:
-            default_preload = {
-                "backfire": 2,
-                "start_catch": 1,
-                "start_crank": 1,
-                "shutdown": 1,
-                "blow_off": 1,
-                "turbo_spool": 1,
-                "knock": 1,
-            }
-            self._open(preload if preload is not None else default_preload)
+        default_preload = {
+            "backfire": 2,
+            "start_catch": 1,
+            "start_crank": 1,
+            "shutdown": 1,
+            "blow_off": 1,
+            "turbo_spool": 1,
+            "knock": 1,
+        }
+        # ``enabled=False`` (headless tests, --no-audio) still builds the
+        # sources: the test harness drives _produce directly against the
+        # bank/voice without opening a device. Only the *stream* is skipped.
+        self._open(preload if preload is not None else default_preload)
+        if not self.enabled:
+            self.stream = None
 
     # ------------------------------------------------------------------ #
     # lifecycle
     # ------------------------------------------------------------------ #
     def _open(self, preload: dict[str, int]) -> None:
         try:
-            self.gain = voice_gain(self.preset, self.sr, self.block_frames)
-            self.voice = EngineVoice(
-                self.preset,
-                rpm=float(self.preset.engine.idle_rpm),
-                load=0.0,
-                throttle=0.0,
-                sr=self.sr,
-                block=self.block_frames,
-                output_gain=self.gain,
-                clip=True,
-            )
-            self._render_shots(preload)
+            if self.mode == "assets":
+                # Asset mode: the bank renders in the background and the
+                # player takes over the callback the moment it is ready.
+                # The stream opens immediately (silence until then), so the
+                # device exists and the GUI never waits on synthesis. The
+                # bank peak-normalises itself (LoopBank.TARGET_PEAK), so the
+                # ~10 s calibration sweep is NOT on the switch path: a preset
+                # change costs bank-build only (~2 s I4, ~9 s W16).
+                self.bank = LoopBank(self.preset, self.sr)
+                self.player = LoopPlayer(self.bank, self.sr)
+                if self.enabled:
+                    # Bank AND one-shots both render off the audio and GUI
+                    # threads. The shots are independent renders too; run
+                    # them in a worker so _open returns immediately after
+                    # opening the stream (the callback emits silence until
+                    # the bank is ready -- a fade-in, not a freeze).
+                    self.bank.build_async()
+                    import threading as _th
+
+                    _th.Thread(
+                        target=self._render_shots,
+                        args=(preload,),
+                        name="shot-bank",
+                        daemon=True,
+                    ).start()
+                else:
+                    # headless tests drive _produce directly: entries must
+                    # exist without a device
+                    self.bank.build_blocking()
+                    self._render_shots(preload)
+                self.gain = voice_gain(self.preset, self.sr, self.block_frames)
+                self.voice = EngineVoice(
+                    self.preset,
+                    rpm=float(self.preset.engine.idle_rpm),
+                    load=0.0,
+                    throttle=0.0,
+                    sr=self.sr,
+                    block=self.block_frames,
+                    output_gain=self.gain,
+                    clip=True,
+                )
+                self._render_shots(preload)
         except Exception as exc:  # keep the window alive even if synthesis breaks
             self.error = f"{type(exc).__name__}: {exc}"
             self.enabled = False
             self.voice = None
             self.stream = None
+            return
+
+        if not self.enabled:
+            # headless: sources are built, no device is opened
             return
 
         # PortAudio first: lower latency, device selection and a cross-platform
@@ -366,6 +417,9 @@ class EngineAudio:
     # synthesis (audio thread)
     # ------------------------------------------------------------------ #
     def _produce(self, out: np.ndarray) -> None:
+        if self.mode == "assets":
+            self._produce_assets(out)
+            return
         voice = self.voice
         if voice is None:
             out.fill(0)
@@ -425,6 +479,70 @@ class EngineAudio:
         pcm = np.rint(frame * 32767.0).astype(np.int16)
         for ch in range(out.shape[1]):
             out[:, ch] = pcm[:, min(ch, pcm.shape[1] - 1)]
+
+    def _produce_assets(self, out: np.ndarray) -> None:
+        """Asset-mode callback: playback only, ~40 us, no synthesis.
+
+        The loop bank renders in the background at preset load; until it
+        finishes (a one-time 1-3 s per preset) this emits silence so the
+        device exists and the GUI never blocks on synthesis. Once ready,
+        the bed is the bank blend at the live operating point, one-shots
+        mix on top exactly as in procedural mode, and the turbo/knock
+        texture loops ride underneath.
+        """
+        n = int(out.shape[0])
+        with self._lock:
+            (
+                rpm, load, throttle, boost, knock, _cycles, torque_pulse, pipe_temp_c
+            ) = self._params
+            triggers = self._triggers
+            self._triggers = []
+
+        player = self.player
+        if player is None or not player.ready or not self.bank.entries:
+            out.fill(0)
+            return
+        # Bank just became ready: fade in over ~150 ms so the entry is not
+        # a hard cut from silence.
+        if self._bank_warm < 1.0:
+            self._bank_warm = min(1.0, self._bank_warm + n / (0.15 * self.sr))
+
+        # operating-point -> blend targets (main-thread side of the player,
+        # but cheap enough to run inline; it is pure arithmetic)
+        player.set_state(
+            rpm, load, throttle, torque_pulse, pipe_temp_c, self._limiter_level
+        )
+        bed = np.zeros(n, dtype=np.float64)
+        player.produce(n, bed)
+        bed *= self._bank_warm
+
+        for name in triggers:
+            variants = self._shots.get(name)
+            if not variants:
+                continue
+            variant = variants[self._shot_index % len(variants)]
+            self._shot_index += 1
+            self._active.append([variant, 0])
+        for entry in self._active:
+            samples, cursor = entry
+            take = min(n, samples.shape[0] - cursor)
+            if take > 0:
+                bed[:take] += samples[cursor : cursor + take]
+                entry[1] += take
+        if self._active:
+            self._active = [e for e in self._active if e[1] < e[0].shape[0]]
+
+        self._mix_loops(bed, boost, knock)
+        if self.master != 1.0:
+            bed *= self.master
+        np.clip(bed, -1.0, 1.0, out=bed)
+        pcm = np.rint(bed * 32767.0).astype(np.int16)
+        for ch in range(out.shape[1]):
+            out[:, ch] = pcm
+
+    def set_limiter(self, level: float) -> None:
+        """Publish the rev-limiter cut state (0..1) for the limiter layer."""
+        self._limiter_level = min(max(float(level), 0.0), 1.0)
 
     def _mix_loops(self, mono: np.ndarray, boost: float, knock: float) -> None:
         """Mix the seamless loop assets under the engine voice.

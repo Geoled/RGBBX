@@ -387,16 +387,22 @@ def test_live_latency_budget_stays_tight() -> None:
 
 
 def test_audio_driver_opens_with_the_low_latency_profile() -> None:
-    """The GUIs must construct EngineAudio with the scaled live blocks."""
+    """The GUIs must construct EngineAudio in asset mode with the small block.
+
+    Asset mode replaced the in-callback synthesiser with bank playback
+    (~40 us per block, margin ~60x), so every engine -- including the
+    16-cylinder W16 -- runs the uniform 128-frame profile; the old
+    cylinder-scaled switch existed only because procedural mode could not
+    hold the deadline.
+    """
     import re
     from pathlib import Path
 
     root = Path(__file__).resolve().parents[1]
     for rel in ("simulator/gui/app.py", "simulator/ui/app.py"):
         text = (root / rel).read_text(encoding="utf-8")
-        assert re.search(r"block_frames=256 if big else 128", text), (
-            f"{rel} lost the cylinder-scaled live block"
-        )
+        assert re.search(r"block_frames=128", text), f"{rel} lost the 128-frame block"
+        assert re.search(r"mode=\"assets\"", text), f"{rel} lost the asset-mode source"
         assert re.search(r"buffers=3", text), f"{rel} lost the 3-buffer queue"
 
 

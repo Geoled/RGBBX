@@ -301,20 +301,17 @@ class SimulatorApp:
             from ..audio import EngineAudio
 
             try:
-                # Live block scales with the engine: 16-path presets measure
-                # ~2100 us per 128-frame callback against a 2667 us deadline --
-                # one scheduler hiccup from an audible, periodic underrun.
-                # 256 frames (5.3 ms) doubles the deadline for the big ones;
-                # small engines keep the 128-frame profile.
-                big = int(preset.block.cylinders) >= 10
+                # Asset mode: constant ~40 us playback callbacks, one small
+                # uniform block for every engine (see gui/app.py note).
                 audio = EngineAudio(
                     preset,
                     sr=48000,
-                    block_frames=256 if big else 128,
+                    block_frames=128,
                     buffers=3,
                     master=self.volume,
                     audio_backend=self.audio_backend,
                     audio_device=self.audio_device,
+                    mode="assets",
                 )
             except Exception as exc:  # noqa: BLE001
                 self.root.after(0, lambda: done(None, f"{type(exc).__name__}: {exc}"))
@@ -692,6 +689,9 @@ class SimulatorApp:
                 model.torque_pulse,
                 model.pipe_temp,
             )
+            # asset mode: the limiter layer rides on the cut state
+            if hasattr(self.audio, "set_limiter"):
+                self.audio.set_limiter(1.0 if model.limiter_cut else 0.0)
 
         self._backfire_flash = max(0.0, self._backfire_flash - dt)
         if model.knock_level > 0.04:

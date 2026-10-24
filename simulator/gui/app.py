@@ -157,23 +157,19 @@ class SimulatorApp:
 
             def open_audio():
                 try:
-                    # Live block scales with the engine: a 16-path W16 at 128
-                    # frames measures ~2100 us per callback against a 2667 us
-                    # deadline -- inside it on a quiet machine, but one GC or
-                    # scheduler hiccup tips it over and an underrun every few
-                    # ms reads as a modem. 256 frames doubles the deadline for
-                    # the big engines (5.3 ms period, still an instant-feeling
-                    # 16 ms round trip with 3 buffers); small engines keep the
-                    # 128-frame profile.
-                    big = int(preset.block.cylinders) >= 10
+                    # Asset mode: the callback only plays pre-rendered loops
+                    # (~40 us per block, margin ~60x), so a uniform small
+                    # block serves every engine including the 16-cylinder W16;
+                    # no per-engine size switch is needed any more.
                     audio = EngineAudio(
                         preset,
                         sr=48000,
-                        block_frames=256 if big else 128,
+                        block_frames=128,
                         buffers=3,
                         master=state.volume,
                         audio_backend=state.audio_backend,
                         audio_device=state.audio_device,
+                        mode="assets",
                     )
                     state.audio = audio
                     if not audio.enabled:
@@ -357,6 +353,9 @@ class SimulatorApp:
                 # resonance climbs with the collector temperature
                 model.pipe_temp,
             )
+            # asset mode: the limiter layer rides on the cut state
+            if hasattr(state.audio, "set_limiter"):
+                state.audio.set_limiter(1.0 if model.limiter_cut else 0.0)
 
         state.backfire_flash = max(0.0, state.backfire_flash - dt)
         if model.knock_level > 0.04:
