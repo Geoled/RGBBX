@@ -103,6 +103,23 @@ class LoopPlayer:
         if limiter > 0.0:
             target["limiter"] = 0.45 * limiter
 
+        # Renormalise the bed rotation: with coast replacing bed power and
+        # the limiter riding on top, the sin/cos pair plus coast can sum
+        # above unity at mid-throttle (measured 0.965 peak on the gas
+        # bank). Cap the bed weights at a total of 1.0 keeping their
+        # ratios, then add the limiter overlay after.
+        bed_total = sum(target.values())
+        if bed_total > 1.0 and "limiter" in target:
+            bed = bed_total - target["limiter"]
+            if bed > 0.0:
+                scale = 1.0 - target["limiter"]
+                for key in ("idle", "mid", "wot", "coast"):
+                    if key in target:
+                        target[key] *= scale / bed
+        elif bed_total > 1.0:
+            for key in list(target):
+                target[key] /= bed_total
+
         # rates: pitch follows rpm relative to each layer's reference rpm.
         # coast is rendered near the top of the range; at low rpm it must
         # not slow below ~0.55x or the overrun bed turns into a drone.

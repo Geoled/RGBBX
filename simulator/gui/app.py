@@ -57,6 +57,9 @@ class AppState:
         self.audio_backend = audio_backend
         self.audio_device = audio_device
         self.audio: EngineAudio | None = None
+        # loop-bank renderer: "procedural" (offline voice) or "gas"
+        # (gas-dynamic core, roadmap B3) -- A/B-able from the UI
+        self.audio_engine = "procedural"
 
         self.throttle = 0.0
         self.brake = 0.0
@@ -110,6 +113,45 @@ class SimulatorApp:
     # ------------------------------------------------------------------ #
     # engine switching
     # ------------------------------------------------------------------ #
+    def reload_audio(self) -> None:
+        """Re-open the audio for the CURRENT preset (renderer A/B switch).
+
+        Reuses select_preset's open path without touching the model.
+        """
+        state = self.state
+        if state.audio is not None:
+            state.audio.stop()
+            state.audio = None
+        if state.audio_wanted and state.preset is not None:
+            state.loading_audio = True
+
+            def open_audio():
+                try:
+                    audio = EngineAudio(
+                        state.preset,
+                        sr=48000,
+                        block_frames=128,
+                        buffers=3,
+                        master=state.volume,
+                        audio_backend=state.audio_backend,
+                        audio_device=state.audio_device,
+                        mode="assets",
+                        engine=getattr(state, "audio_engine", "procedural"),
+                    )
+                    state.audio = audio
+                    if not audio.enabled:
+                        state.status = f"audio unavailable: {audio.error}"
+                    else:
+                        state.status = f"renderer {state.audio_engine}: {state.preset.name}"
+                except Exception as exc:  # noqa: BLE001
+                    state.status = f"audio error: {exc}"
+                finally:
+                    state.loading_audio = False
+
+            import threading
+
+            threading.Thread(target=open_audio, daemon=True).start()
+
     def select_preset(self, index: int) -> None:
         import threading
 
@@ -161,6 +203,9 @@ class SimulatorApp:
                     # (~40 us per block, margin ~60x), so a uniform small
                     # block serves every engine including the 16-cylinder W16;
                     # no per-engine size switch is needed any more.
+                    # engine="gas": the loop bank renders from the gas-dynamic
+                    # core (roadmap B3) -- selectable per state so the two
+                    # renderers can be A/B'd live from the UI.
                     audio = EngineAudio(
                         preset,
                         sr=48000,
@@ -170,6 +215,7 @@ class SimulatorApp:
                         audio_backend=state.audio_backend,
                         audio_device=state.audio_device,
                         mode="assets",
+                        engine=getattr(state, "audio_engine", "procedural"),
                     )
                     state.audio = audio
                     if not audio.enabled:

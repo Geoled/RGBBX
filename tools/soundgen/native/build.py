@@ -25,11 +25,13 @@ from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
 SOURCE = HERE / "dspcore.cpp"
+GAS_SOURCE = HERE / "gascore.cpp"
 # The extension is imported as a top-level module, so it has to sit where
 # ``tools/soundgen`` is already on sys.path (next to the ``soundgen`` package).
 OUT_DIR = HERE.parent
 TARGET = OUT_DIR / ("_dspcore" + (sysconfig.get_config_var("EXT_SUFFIX") or ".pyd"))
 STALE = HERE / ("_dspcore" + (sysconfig.get_config_var("EXT_SUFFIX") or ".pyd"))
+GAS_TARGET = OUT_DIR / ("_gascore" + (sysconfig.get_config_var("EXT_SUFFIX") or ".pyd"))
 
 # Visual Studio installs found on this machine and the usual default location.
 _VS_CANDIDATES = (
@@ -83,17 +85,8 @@ def _sources() -> tuple[list[str], str, str]:
     )
 
 
-def build(force: bool = False) -> Path:
-    if TARGET.is_file() and not force:
-        if TARGET.stat().st_mtime >= SOURCE.stat().st_mtime:
-            return TARGET
-    vcvars = _find_vcvars()
-    if vcvars is None:
-        raise SystemExit(
-            "no MSVC found; set RGBBX_VCVARS to VC/Auxiliary/Build/vcvars64.bat"
-        )
-    incs, libdir, libname = _sources()
-    obj = HERE / "dspcore.obj"
+def _compile(source: Path, target: Path, obj_name: str, vcvars: Path, incs, libdir, libname):
+    obj = HERE / obj_name
     cmd = ["cl.exe", "/nologo", "/O2", "/std:c++17", "/EHsc", "/MD", "/LD",
            "/DNDEBUG", "/D_CRT_SECURE_NO_WARNINGS", "/favor:smallCode"]
     # Stage 6: the live audio callback runs at 64 frames (1.33 ms at 48 kHz).
@@ -101,7 +94,7 @@ def build(force: bool = False) -> Path:
     # Python->C++ crossing costs ~1 us of marshalling, so /favor:smallCode
     # keeps the hot loops in the near cache and the GIL never comes into it.
     cmd += ["/I" + inc for inc in incs]
-    cmd += [str(SOURCE), "/Fe:" + str(TARGET), "/Fo:" + str(obj),
+    cmd += [str(source), "/Fe:" + str(target), "/Fo:" + str(obj),
             "/link", "/LIBPATH:" + libdir, libname + ".lib"]
     bat = HERE / "_build.bat"
     bat.write_text(
@@ -117,18 +110,36 @@ def build(force: bool = False) -> Path:
         )
     finally:
         bat.unlink(missing_ok=True)
-    if proc.returncode != 0 or not TARGET.is_file():
+    if proc.returncode != 0 or not target.is_file():
         raise SystemExit(
-            "native build failed\n" + (proc.stdout or "") + (proc.stderr or "")
+            f"native build failed ({source.name})\n"
+            + (proc.stdout or "") + (proc.stderr or "")
         )
     obj.unlink(missing_ok=True)
-    # cl writes _dspcore.pyd plus an import library; drop the extra artefacts
-    for extra in OUT_DIR.glob("_dspcore*.lib"):
+    # cl writes the .pyd plus an import library; drop the extra artefacts
+    stem = target.stem
+    for extra in OUT_DIR.glob(stem + "*.lib"):
         extra.unlink(missing_ok=True)
-    for extra in OUT_DIR.glob("_dspcore*.exp"):
+    for extra in OUT_DIR.glob(stem + "*.exp"):
         extra.unlink(missing_ok=True)
+
+
+def build(force: bool = False) -> Path:
+    vcvars = _find_vcvars()
+    if vcvars is None:
+        raise SystemExit(
+            "no MSVC found; set RGBBX_VCVARS to VC/Auxiliary/Build/vcvars64.bat"
+        )
+    incs, libdir, libname = _sources()
+
+    if force or not TARGET.is_file() or TARGET.stat().st_mtime < SOURCE.stat().st_mtime:
+        _compile(SOURCE, TARGET, "dspcore.obj", vcvars, incs, libdir, libname)
     if STALE.is_file():
         STALE.unlink(missing_ok=True)
+
+    # gas core: rebuilt when its source changes or the artefact is missing
+    if force or not GAS_TARGET.is_file() or GAS_TARGET.stat().st_mtime < GAS_SOURCE.stat().st_mtime:
+        _compile(GAS_SOURCE, GAS_TARGET, "gascore.obj", vcvars, incs, libdir, libname)
     return TARGET
 
 

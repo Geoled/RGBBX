@@ -47,7 +47,8 @@ class LoopBank:
 
     TARGET_PEAK = 0.79  # -2 dBFS
 
-    def __init__(self, preset, sr: int, gain: float = 1.0, block: int = 1024):
+    def __init__(self, preset, sr: int, gain: float = 1.0, block: int = 1024,
+                 engine: str = "procedural"):
         self.preset = preset
         self.sr = int(sr)
         self.ready = threading.Event()
@@ -61,6 +62,10 @@ class LoopBank:
         self.entries: dict[str, tuple[np.ndarray, float]] = {}
         self._gain = float(gain)
         self._block = int(block)
+        # Renderer: "procedural" (the offline voice) or "gas" (the gas-
+        # dynamic core, roadmap B3). Both produce the same entry format,
+        # so the player and the whole asset path are renderer-agnostic.
+        self.engine = str(engine)
 
     # ------------------------------------------------------------------ #
     # construction (background thread)
@@ -82,12 +87,19 @@ class LoopBank:
             # switch that plays within seconds and one that sits in silence.
             import concurrent.futures as cf
 
-            def _one(spec):
-                rpm = layers_mod.layer_rpm(self.preset, spec)
-                x = layers_mod.render_layer(
-                    self.preset, spec, self._gain, sr=self.sr, block=self._block
-                )
-                return spec.key, (np.asarray(x, dtype=np.float64), rpm)
+            if self.engine == "gas":
+                from soundgen import gasbank
+
+                def _one(spec):
+                    x, rpm = gasbank.render_gas_layer(self.preset, spec, sr=self.sr)
+                    return spec.key, (np.asarray(x, dtype=np.float64), rpm)
+            else:
+                def _one(spec):
+                    rpm = layers_mod.layer_rpm(self.preset, spec)
+                    x = layers_mod.render_layer(
+                        self.preset, spec, self._gain, sr=self.sr, block=self._block
+                    )
+                    return spec.key, (np.asarray(x, dtype=np.float64), rpm)
 
             with cf.ThreadPoolExecutor(max_workers=3) as ex:
                 for key, entry in ex.map(_one, layers_mod.DEFAULT_LAYERS):

@@ -109,6 +109,7 @@ class EngineAudio:
         audio_backend: str = "auto",
         audio_device: int | str | None = None,
         mode: str = "assets",
+        engine: str = "procedural",
     ):
         self.preset = preset
         self.sr = int(sr)
@@ -122,7 +123,10 @@ class EngineAudio:
         # (constant ~40 us callbacks, no synthesis in the audio thread);
         # "procedural" runs the full EngineVoice in the callback (offline
         # renders, tests, and whoever wants the live path back).
+        # ``engine`` picks the bank's renderer: "procedural" (the offline
+        # voice) or "gas" (the gas-dynamic core, roadmap B3).
         self.mode = str(mode)
+        self.engine = str(engine)
         # 2 channels: the voice's process_stereo() pans the exhaust banks
         # (a V8 keeps its two-pipe width); mono devices get a duplicated
         # frame and lose only the width, nothing else.
@@ -190,7 +194,7 @@ class EngineAudio:
                 # bank peak-normalises itself (LoopBank.TARGET_PEAK), so the
                 # ~10 s calibration sweep is NOT on the switch path: a preset
                 # change costs bank-build only (~2 s I4, ~9 s W16).
-                self.bank = LoopBank(self.preset, self.sr)
+                self.bank = LoopBank(self.preset, self.sr, engine=self.engine)
                 self.player = LoopPlayer(self.bank, self.sr)
                 if self.enabled:
                     # Bank AND one-shots both render off the audio and GUI
@@ -212,6 +216,7 @@ class EngineAudio:
                     # exist without a device
                     self.bank.build_blocking()
                     self._render_shots(preload)
+            else:
                 self.gain = voice_gain(self.preset, self.sr, self.block_frames)
                 self.voice = EngineVoice(
                     self.preset,
