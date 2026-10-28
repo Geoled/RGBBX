@@ -177,6 +177,7 @@ python -m PyInstaller --noconfirm --clean engine_lab.spec
 
 | Симптом | Причина / решение |
 |---|---|
+| `Failed to load Python DLL ... build\engine_lab\_internal\python314.dll` | запущен промежуточный exe из `build\engine_lab` — он не работает без `_internal`. Запускайте `dist\EngineLab\EngineLab.exe` |
 | `Failed to execute script 'launcher'` | скопирован только exe без `_internal` — копируйте папку целиком |
 | Окно не открывается, в консоли `moderngl`/`OpenGL` | драйвер GPU без OpenGL 3.3, обновите драйвер |
 | Нет звука, в статусе `audio error` | запустите `EngineLabDebug.exe` и посмотрите текст; попробуйте `--audio-backend winmm` |

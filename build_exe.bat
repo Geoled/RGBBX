@@ -44,6 +44,13 @@ if /i "%~1"=="--zip" (
 echo.
 echo [ok] portable build: dist\EngineLab\EngineLab.exe
 echo      copy the whole dist\EngineLab folder to the other PC.
+
+rem PyInstaller also leaves exe wrappers in build\engine_lab. They have no
+rem _internal next to them, so launching one by accident fails with
+rem "Failed to load Python DLL ... build\engine_lab\_internal\python314.dll".
+rem Delete them: only dist\ should contain a runnable exe.
+del /q "build\engine_lab\EngineLab.exe" 2>nul
+del /q "build\engine_lab\EngineLabDebug.exe" 2>nul
 exit /b 0
 
 :failed
