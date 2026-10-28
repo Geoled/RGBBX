@@ -96,6 +96,10 @@ def main(argv: list[str] | None = None) -> int:
         return 1
 
     print("Engine simulator self test\n")
+    from soundgen import native as _native
+
+    print(f"  DSP core: {_native.describe()}")
+    print()
     rows = []
     for path in paths:
         preset = load_preset(path)

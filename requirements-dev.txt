@@ -3,3 +3,5 @@ pytest>=8
 ruff>=0.6
 # native DSP core (stage 5); the voice falls back to numpy without it
 pybind11>=3.0
+# portable Windows build (build_exe.bat)
+pyinstaller>=6.9
