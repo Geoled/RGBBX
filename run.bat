@@ -10,6 +10,8 @@ rem      run.bat --selftest
 rem ===================================================================
 setlocal enableextensions
 chcp 65001 >nul
+rem --- DSP: set RGBBX_NO_NATIVE=1 to force the pure-numpy path --------
+rem set "RGBBX_NO_NATIVE=1"
 title Engine Simulator
 
 rem --- всегда работаем из папки, где лежит этот файл -------------------

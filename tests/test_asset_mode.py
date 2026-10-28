@@ -16,7 +16,7 @@ import pytest
 from simulator import bootstrap  # noqa: F401
 from simulator.audio.driver import EngineAudio
 from simulator.audio.loopbank import LoopBank
-from simulator.audio.loopplayer import LoopPlayer
+from simulator.audio.loopplayer import COAST_MAX, COAST_RATE_MAX, LoopPlayer
 from soundgen.config import load_preset
 from simulator.bootstrap import preset_dir
 
@@ -58,6 +58,72 @@ def test_player_blend_is_legal_over_the_whole_range() -> None:
             player.produce(512, out)
             worst = max(worst, float(np.abs(out).max()))
     assert worst <= 0.9, f"blend peak {worst:.3f} over the ceiling"
+
+
+def test_blend_keeps_idle_at_idle_not_on_the_coast_loop() -> None:
+    """The first sound after a preset load must be the idle layer.
+
+    The coast loop is rendered at ~58 % of the rev range. Weighting it by
+    ``1 - state`` alone made it the *only* layer at closed throttle, so idle
+    was that loop played at its 0.55x floor -- heard as a fan, not an engine.
+    """
+    preset = _preset("i4_gasoline")
+    bank = LoopBank(preset, SR)
+    bank.build_blocking()
+    player = LoopPlayer(bank, SR)
+    player.prepare()
+
+    idle = preset.engine.idle_rpm
+    player.set_state(idle, 0.0, 0.0, 0.0, 200.0, 0.0)
+    assert player._target["idle"] == pytest.approx(1.0, abs=1e-6)
+    assert player._target.get("coast", 0.0) == pytest.approx(0.0, abs=1e-6)
+
+    red = preset.engine.redline_rpm
+    player.set_state(red, 0.0, 0.0, 0.0, 600.0, 0.0)
+    assert player._target["coast"] == pytest.approx(COAST_MAX, abs=1e-6)
+    # ... and it never takes the whole bed: the speed layer keeps the rest,
+    # otherwise lift-off at speed is a bare hiss with no pumping low end.
+    assert player._target["wot"] == pytest.approx(1.0 - COAST_MAX, abs=1e-6)
+    # Coast is a texture, not a note: pitching it up 1.6x turned its 1-3 kHz
+    # band into 1.6-4.8 kHz hiss ("torn" top end).
+    assert player._rate["coast"] <= COAST_RATE_MAX + 1e-9
+
+    # Above the wot render point (~72 % of the range) the wot loop must be
+    # the only speed layer: mixing the 1.5x-pitched mid loop into it is what
+    # made the top end sound like a whine.
+    player.set_state(5400.0, 1.0, 1.0, 0.6, 500.0, 0.0)
+    assert player._target["wot"] > 0.95
+    assert player._target.get("mid", 0.0) < 0.05
+
+
+def test_playback_rate_is_smoothed() -> None:
+    """A step in rpm must not step the read rate inside one block.
+
+    Each step is a waveform discontinuity in slope; a pull through the rev
+    range produced a chain of them, heard as tearing at the top end.
+    """
+    preset = _preset("i4_gasoline")
+    bank = LoopBank(preset, SR)
+    bank.build_blocking()
+    player = LoopPlayer(bank, SR)
+    player.prepare()
+    out = np.zeros(128)
+
+    player.set_state(4000.0, 1.0, 1.0, 0.6, 500.0, 0.0)
+    for _ in range(400):
+        player.produce(128, out)
+    before = player._rate_live["wot"]
+    player.set_state(6500.0, 1.0, 1.0, 0.6, 500.0, 0.0)
+    player.produce(128, out)
+    target = player._rate["wot"] * (1.0 + player._heat)
+    assert before < player._rate_live["wot"] < target
+
+    # Above the wot render point (~72 % of the range) the wot loop must be
+    # the only speed layer: mixing the 1.5x-pitched mid loop into it is what
+    # made the top end sound like a whine.
+    player.set_state(5400.0, 1.0, 1.0, 0.6, 500.0, 0.0)
+    assert player._target["wot"] > 0.95
+    assert player._target.get("mid", 0.0) < 0.05
 
 
 def test_player_callback_is_constant_and_far_inside_deadline() -> None:

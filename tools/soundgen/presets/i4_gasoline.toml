@@ -74,8 +74,9 @@ accessory_gain = 0.030
 accessory_hz = 240.0
 
 [character]
-brightness_db = 4.0
-aggression = 1.35
+brightness_db = 0.0
+aggression = 1.15
+air_cutoff_hz = 4500.0
 lumpiness = 0.0
 irregularity = 0.05
 idle_floor = 0.22

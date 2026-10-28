@@ -27,11 +27,29 @@ order right), ``torque_pulse`` amplitude-modulates the engine bed, and
 
 from __future__ import annotations
 
+import hashlib
+import os
 import threading
+from dataclasses import asdict
+from pathlib import Path
 
 import numpy as np
 
 from soundgen import layers as layers_mod
+
+# Bump when the rendered signal changes (voice, kernels, layer definitions):
+# old cache files are then ignored instead of serving a stale bank.
+BANK_CACHE_VERSION = 3
+# Keep the cache bounded: 5 layers are ~2.3 MB as float32, and a user can
+# audition all 50 presets. Older banks are evicted least-recently-written.
+MAX_CACHED_BANKS = 12
+
+
+def _cache_dir() -> Path:
+    """Per-user cache for rendered banks (never inside the repository)."""
+    root = os.environ.get("LOCALAPPDATA") or os.environ.get("XDG_CACHE_HOME")
+    base = Path(root) if root else Path.home() / ".cache"
+    return base / "EngineLab" / "loopbank"
 
 
 class LoopBank:
@@ -80,30 +98,37 @@ class LoopBank:
 
     def _build(self) -> None:
         try:
-            # Layers are independent renders and the native convolver
-            # releases the GIL inside its FFT passes, so a small pool of
-            # worker threads genuinely overlaps them: the W16's bank drops
-            # from ~22 s to ~9 s, which is the difference between a preset
-            # switch that plays within seconds and one that sits in silence.
-            import concurrent.futures as cf
-
-            if self.engine == "gas":
-                from soundgen import gasbank
-
-                def _one(spec):
-                    x, rpm = gasbank.render_gas_layer(self.preset, spec, sr=self.sr)
-                    return spec.key, (np.asarray(x, dtype=np.float64), rpm)
+            if self._load_cache():
+                # A previous run already rendered this exact preset at this
+                # sample rate: the bank is on disk, so a preset switch is a
+                # file read instead of 5 full synthesis passes.
+                pass
             else:
-                def _one(spec):
-                    rpm = layers_mod.layer_rpm(self.preset, spec)
-                    x = layers_mod.render_layer(
-                        self.preset, spec, self._gain, sr=self.sr, block=self._block
-                    )
-                    return spec.key, (np.asarray(x, dtype=np.float64), rpm)
+                # Layers are independent renders and the native convolver
+                # releases the GIL inside its FFT passes, so a small pool of
+                # worker threads genuinely overlaps them: the W16's bank drops
+                # from ~22 s to ~9 s, which is the difference between a preset
+                # switch that plays within seconds and one that sits in silence.
+                import concurrent.futures as cf
 
-            with cf.ThreadPoolExecutor(max_workers=3) as ex:
-                for key, entry in ex.map(_one, layers_mod.DEFAULT_LAYERS):
-                    self.entries[key] = entry
+                if self.engine == "gas":
+                    from soundgen import gasbank
+
+                    def _one(spec):
+                        x, rpm = gasbank.render_gas_layer(self.preset, spec, sr=self.sr)
+                        return spec.key, (np.asarray(x, dtype=np.float64), rpm)
+                else:
+                    def _one(spec):
+                        rpm = layers_mod.layer_rpm(self.preset, spec)
+                        x = layers_mod.render_layer(
+                            self.preset, spec, self._gain, sr=self.sr, block=self._block
+                        )
+                        return spec.key, (np.asarray(x, dtype=np.float64), rpm)
+
+                with cf.ThreadPoolExecutor(max_workers=3) as ex:
+                    for key, entry in ex.map(_one, layers_mod.DEFAULT_LAYERS):
+                        self.entries[key] = entry
+                self._save_cache()
             # one normalisation pass for the whole bank: the layers keep
             # their relative balance, the bank lands on the target peak
             peak = max(float(np.abs(x).max()) for x, _ in self.entries.values())
@@ -116,6 +141,62 @@ class LoopBank:
             self.error = f"{type(exc).__name__}: {exc}"
         finally:
             self.ready.set()
+
+    # ------------------------------------------------------------------ #
+    # on-disk bank cache
+    # ------------------------------------------------------------------ #
+    def _cache_path(self) -> Path:
+        payload = repr(
+            (asdict(self.preset), self.sr, self._block, self.engine, BANK_CACHE_VERSION)
+        )
+        digest = hashlib.sha1(payload.encode("utf-8")).hexdigest()
+        return _cache_dir() / f"{digest}.npz"
+
+    def _load_cache(self) -> bool:
+        """Load a previously rendered (un-normalised) bank, if it exists."""
+        try:
+            path = self._cache_path()
+            if not path.is_file():
+                return False
+            expected = {spec.key for spec in layers_mod.DEFAULT_LAYERS}
+            with np.load(path) as data:
+                entries = {}
+                for key in expected:
+                    if key not in data.files or f"{key}__rpm" not in data.files:
+                        return False
+                    entries[key] = (
+                        np.asarray(data[key], dtype=np.float64),
+                        float(data[f"{key}__rpm"]),
+                    )
+            if set(entries) != expected:
+                return False
+            self.entries = entries
+            return True
+        except Exception:  # a corrupt cache is a miss, never an error
+            return False
+
+    def _save_cache(self) -> None:
+        """Persist the freshly rendered bank (best effort, atomic replace)."""
+        try:
+            path = self._cache_path()
+            path.parent.mkdir(parents=True, exist_ok=True)
+            arrays = {}
+            for key, (x, rpm) in self.entries.items():
+                # float32 keeps the cache at ~2.3 MB per preset; the bed is
+                # exported as 16-bit PCM, so the extra precision is inaudible.
+                arrays[key] = np.asarray(x, dtype=np.float32)
+                arrays[f"{key}__rpm"] = np.asarray(rpm, dtype=np.float64)
+            tmp = path.with_name(f"{path.name}.{os.getpid()}.tmp.npz")
+            np.savez(tmp, **arrays)
+            os.replace(tmp, path)
+            # bound the cache so auditioning the whole catalogue cannot grow it
+            files = sorted(
+                path.parent.glob("*.npz"), key=lambda p: p.stat().st_mtime, reverse=True
+            )
+            for old in files[MAX_CACHED_BANKS:]:
+                old.unlink(missing_ok=True)
+        except Exception:  # cache is an optimisation only
+            pass
 
     def build_blocking(self) -> None:
         """For tests: build synchronously."""

@@ -162,14 +162,6 @@ def draw_controls(app, state, w: float, h: float, pos=None) -> None:
         imgui.same_line()
         if _switch("RE-FRAME", False, theme.STEEL):
             app.viewport.frame_camera()
-        imgui.same_line()
-        # Renderer A/B: procedural bank vs the gas-dynamic core (roadmap
-        # B3). Toggling flips state.audio_engine and re-opens the bank for
-        # the current preset so both paradigms are one click apart.
-        if _switch("GAS CORE", state.audio_engine == "gas", theme.ORANGE):
-            state.audio_engine = "gas" if state.audio_engine != "gas" else "procedural"
-            state.status = "renderer: " + state.audio_engine
-            app.reload_audio()
     finally:
         widgets.end_panel()
 

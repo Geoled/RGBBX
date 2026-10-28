@@ -310,6 +310,11 @@ class EngineAudio:
         self.stream = None
 
     def _render_shots(self, preload: dict[str, int]) -> None:
+        # The bank is the critical path to the first audible sample; the
+        # one-shots are not. Render them after the bank so they do not
+        # compete with its worker threads for CPU on small machines.
+        if self.mode == "assets" and self.bank is not None:
+            self.bank.ready.wait()
         specs = {spec.key: spec for spec in events_for(self.preset)}
         for key, count in preload.items():
             spec = specs.get(key)

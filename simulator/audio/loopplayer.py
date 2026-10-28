@@ -10,13 +10,17 @@ Blend model (all state is precomputed, the loop is arithmetic):
 * two layers play at a time, crossfaded along the rpm axis
   (idle<->mid<->wot);
 * the coast layer carries the closed-throttle character and blends in
-  against the speed pair with weight (1 - state);
+  against the speed pair only as speed rises (at idle it is silent: the
+  coast loop is rendered high in the rev range and would sound like a fan),
+  and it never takes the whole bed -- overrun keeps a share of the speed
+  layer so it still has a pumping low end;
 * the limiter layer is a gated overlay: the caller supplies limiter
   intensity (0..1, the model's cut flag smoothed) and it rides on top;
 * pitch = rpm / layer_ref_rpm (playing a loop rendered at rpm0 at rate
   rpm/rpm0 reproduces the firing order exactly, and the loops were
   rendered at a whole number of cycles so they stay periodic at any
-  integer playback rate);
+  integer playback rate); the rate is one-pole smoothed so a fast pull
+  through the rev range does not step the pitch block by block;
 * ``torque_pulse`` amplitude-modulates the engine bed (attack/release
   smoothed inside the player -- the published pulse is a 120 Hz sample
   of a ~6 ms Wiebe peak, smoothing was already proven necessary there);
@@ -30,6 +34,13 @@ from __future__ import annotations
 import math
 
 import numpy as np
+
+# Coast is a noise-led overrun texture, not a tone: it may never take the
+# whole bed (no body left) and it is never pitched far from its render point
+# (pitching it up turns its 1-3 kHz band into hiss).
+COAST_MAX = 0.62
+COAST_RATE_MIN = 0.85
+COAST_RATE_MAX = 1.12
 
 
 class LoopPlayer:
@@ -45,6 +56,7 @@ class LoopPlayer:
         self._gain_live: dict[str, float] = {}
         self._target: dict[str, float] = {}
         self._rate: dict[str, float] = {}
+        self._rate_live: dict[str, float] = {}
         self._bed_lpf = 1.0  # smoothed torque_pulse for the AM
         self._lim = 0.0
         self._am_target = 0.0
@@ -83,23 +95,44 @@ class LoopPlayer:
         f = min(max((rpm - self.bank.rpm_lo) / span, 0.0), 1.0)
         state = 0.6 * min(max(load, 0.0), 1.0) + 0.4 * min(max(throttle, 0.0), 1.0)
 
+        # Coast is the overrun character: the throttle-shut loop is rendered
+        # near the top of the rev range, so it must only take over when the
+        # engine is actually turning fast. Letting it replace the bed at idle
+        # (the old ``1 - state`` weight) meant the very first sound after a
+        # preset load was the coast loop played at its 0.55x floor -- a low
+        # whine that reads as a fan, not an engine. Fade it in with speed and
+        # hand the remaining bed power to the normal idle/mid/wot crossfade.
+        #
+        # It is also capped below unity: the coast loop is noise-led (its
+        # energy sits at 1-3 kHz), so weighting it at 1.0 made lift-off at
+        # speed a bare hiss with no body. Keeping a share of the speed layer
+        # underneath restores the pumping low end the ear expects on overrun.
+        speed = min(max(f / 0.30, 0.0), 1.0)
+        coast = COAST_MAX * (1.0 - state) * speed
+        bed = 1.0 - coast
         # Bed blend, equal-power, capped at unity total: the two speed
-        # layers crossfade with sin/cos weights; the coast layer replaces
-        # bed power rather than adding to it (same denominator), so the
-        # blend is a rotation, not a sum -- WOT must not clip against the
-        # ceiling the layers were peak-normalised into.
+        # layers crossfade with sin/cos weights over the remaining ``bed``
+        # power, so the blend stays a rotation and WOT cannot clip against
+        # the ceiling the layers were peak-normalised into.
         target: dict[str, float] = {}
         if f <= 0.42:
             k = f / 0.42 if 0.42 > 0 else 0.0
             a, b = math.cos(k * math.pi / 2), math.sin(k * math.pi / 2)
-            target["idle"] = a * state
-            target["mid"] = b * state
-        else:
-            k = (f - 0.42) / 0.58 if 0.58 > 0 else 1.0
+            target["idle"] = a * bed
+            target["mid"] = b * bed
+        elif f <= 0.72:
+            # mid and wot are rendered at 42 % and 72 % of the range: cross
+            # them between those two anchors, not all the way to the redline.
+            # The old 0.42..1.0 sweep kept half the mid loop (a 1.5x pitch
+            # shift) under the wot note until the limiter, which is heard as
+            # a thin two-tone whine rather than an engine.
+            k = (f - 0.42) / 0.30 if 0.30 > 0 else 1.0
             a, b = math.cos(k * math.pi / 2), math.sin(k * math.pi / 2)
-            target["mid"] = a * state
-            target["wot"] = b * state
-        target["coast"] = 1.0 - state
+            target["mid"] = a * bed
+            target["wot"] = b * bed
+        else:
+            target["wot"] = bed
+        target["coast"] = coast
         if limiter > 0.0:
             target["limiter"] = 0.45 * limiter
 
@@ -122,17 +155,16 @@ class LoopPlayer:
 
         # rates: pitch follows rpm relative to each layer's reference rpm.
         # coast is rendered near the top of the range; at low rpm it must
-        # not slow below ~0.55x or the overrun bed turns into a drone.
-        for key, w in target.items():
-            entry = self._entry(key)
-            if entry is None:
-                continue
-            _, ref = entry
-            rate = rpm / max(ref, 1.0)
+        # not slow below ~0.55x or the overrun bed turns into a drone, and
+        # at high rpm it is a *texture*, not a note: pitching a noise loop
+        # up 1.6x turns its 1-3 kHz band into 1.6-4.8 kHz hiss, which is
+        # exactly the "torn" top end. Keep it near its rendered pitch.
+        for key, entry in self.bank.entries.items():
+            rate = rpm / max(entry[1], 1.0)
             if key == "coast":
-                rate = max(rate, 0.55)
+                rate = min(max(rate, COAST_RATE_MIN), COAST_RATE_MAX)
             self._rate[key] = float(rate)
-            self._gain[key] = float(w)
+        self._gain = {key: float(w) for key, w in target.items()}
         self._target = target
         # pitch heat: reference 60..600 C published by the model
         if pipe_temp_c is not None:
@@ -148,7 +180,18 @@ class LoopPlayer:
     def prepare(self) -> None:
         """Main-thread prelude: prime live gains from the first targets."""
         self._gain_live = {k: v for k, v in self._gain.items()}
+        self._rate_live = {
+            k: v * (1.0 + self._heat) for k, v in self._rate.items()
+        }
         self.ready = True
+
+    def _live_rate(self, key: str, alpha: float) -> float:
+        """One-pole the read rate toward its target (audio thread)."""
+        target = self._rate.get(key, 1.0) * (1.0 + self._heat)
+        live = self._rate_live.get(key, target)
+        live += (target - live) * alpha
+        self._rate_live[key] = live
+        return live
 
     # ------------------------------------------------------------------ #
     # audio thread
@@ -164,6 +207,11 @@ class LoopPlayer:
 
         # ramp live gains toward targets (one-pole over the block)
         alpha_g = min(1.0, n / (0.030 * self.sr))  # 30 ms gain ramps
+        # Pitch gets the same treatment: a step in rpm used to step the read
+        # rate within one block, and a chain of those steps is heard as
+        # tearing on a fast pull. 45 ms is short enough that the note still
+        # tracks the tacho, long enough to smooth a block-rate update.
+        alpha_r = min(1.0, n / (0.045 * self.sr))
         active: list[tuple[str, float, float]] = []
         for key, w in self._target.items():
             entry = self._entry(key)
@@ -173,11 +221,13 @@ class LoopPlayer:
                     # let it fade out, then stop reading it
                     self._gain_live[key] = live * (1.0 - alpha_g)
                     if self._gain_live[key] > 0.001:
-                        active.append((key, self._gain_live[key], self._rate.get(key, 1.0)))
+                        active.append(
+                            (key, self._gain_live[key], self._live_rate(key, alpha_r))
+                        )
                 continue
             live = self._gain_live.get(key, 0.0) + (w - self._gain_live.get(key, 0.0)) * alpha_g
             self._gain_live[key] = live
-            rate = self._rate.get(key, 1.0) * (1.0 + self._heat)
+            rate = self._live_rate(key, alpha_r)
             if live > 0.001:
                 active.append((key, live, rate))
 

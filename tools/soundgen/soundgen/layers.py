@@ -30,7 +30,13 @@ DEFAULT_LAYERS: tuple[LayerSpec, ...] = (
     LayerSpec("idle", "Idle / closed throttle", rpm_frac=0.00, load=0.03, throttle=0.00),
     LayerSpec("mid", "Part throttle", rpm_frac=0.42, load=0.45, throttle=0.42),
     LayerSpec("wot", "Wide open throttle", rpm_frac=0.72, load=1.00, throttle=1.00),
-    LayerSpec("coast", "Overrun / engine braking", rpm_frac=0.58, load=0.00, throttle=0.00),
+    # Coast is rendered with a little load on purpose. A truly loadless
+    # render is almost pure turbulence: 54 % of its energy sat at 1-3 kHz and
+    # lifting off at speed was a hiss with no body. The pumping loss that
+    # dominates real engine braking rides on the same pulse train as
+    # part-load combustion, so a small load restores the low end without
+    # making it sound like a throttle that is still open.
+    LayerSpec("coast", "Overrun / engine braking", rpm_frac=0.58, load=0.18, throttle=0.08),
     LayerSpec("limiter", "Rev limiter bounce", rpm_frac=1.00, load=1.00, throttle=1.00, limiter=True),
 )
 
