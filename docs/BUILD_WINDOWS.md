@@ -117,6 +117,46 @@ EngineLab.exe --preset v8_crossplane
 
 ---
 
+## 4.1. Экспорт игровых ассетов
+
+Кнопка **EXPORT PACK** (клавиша `P`) в панели управления рендерит полный
+набор звуков текущего двигателя — не для прослушивания, а для встраивания в
+игру. Рендер идёт в фоновом потоке, интерфейс не замирает; по завершении
+папка открывается в Проводнике, а путь пишется в строку статуса.
+
+```
+%LOCALAPPDATA%\EngineLab\exports\<slug>\
+    README.md                  как склеивать лупы, таблица опорных точек
+    manifest.json              файлы, loopStart/loopEnd, referenceRpm, load, throttle
+    EngineSoundManifest.luau   готовый модуль для Roblox (assetId = 0, заполнить после загрузки)
+    layers\<slug>__idle.wav    луп: холостой ход
+    layers\<slug>__mid.wav     луп: частичная нагрузка
+    layers\<slug>__wot.wav     луп: полный газ
+    layers\<slug>__coast.wav   луп: принудительный холостой ход / торможение двигателем
+    layers\<slug>__limiter.wav луп: отсечка
+    events\<slug>__*.wav       стартер, пуск, глушение, выстрел, blow-off, spool, детонация
+%LOCALAPPDATA%\EngineLab\exports\<slug>.zip   тот же набор архивом
+```
+
+Почему `%LOCALAPPDATA%`, а не папка программы: установленная копия может лежать
+в `Program Files` и быть только для чтения, а экспорт — пользовательский
+результат, как и кэш банков.
+
+Формат экспорта: 48 кГц, 16 бит, стерео, с TPDF-дизерингом — то, что
+принимает большинство движков; для мастеринга есть CLI (`--sr`, `--bits`,
+`--channels`). Каждый луп — целое число циклов двигателя, поэтому повторяется
+без шва и не требует кроссфейда (проверяется тестом и `soundgen selftest`).
+
+То же самое из командной строки, без GUI (весь каталог пресетов или один):
+
+```bat
+python -m soundgen pack --preset tools\soundgen\presets\i4_gasoline.toml --out out\pack --zip
+```
+
+`python -m soundgen pack --help` — остальные ключи (`--no-events`, `--dither`).
+
+---
+
 ## 5. Требования на целевом ПК
 
 * Windows 10/11 x64 (см. раздел про Windows 7 ниже);
