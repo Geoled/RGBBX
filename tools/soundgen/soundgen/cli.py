@@ -7,7 +7,7 @@ import sys
 import time
 from pathlib import Path
 
-from . import events as events_mod, layers as layers_mod, realtime, render
+from . import events as events_mod, layers as layers_mod, pack as pack_mod, realtime, render
 from .config import load_preset, discover_presets
 from . import layout as layout_mod
 
@@ -137,6 +137,30 @@ def cmd_render(args) -> int:
     elapsed = time.perf_counter() - start
     print(f"\nDone in {elapsed:.2f}s  |  manifest: {json_path.name}, {luau_path.name}")
     print("Next: upload the WAV files, then set assetId in EngineSoundManifest.luau.")
+    return 0
+
+
+def cmd_pack(args) -> int:
+    """Render a game-ready pack: loops/events per engine + README + manifests."""
+    presets = [load_preset(p) for p in _resolve_presets(args)]
+    opts = pack_mod.PackOptions(
+        sample_rate=args.sr,
+        bit_depth=args.bits,
+        channels=args.channels,
+        include_events=not args.no_events,
+        archive=args.zip,
+        dither=args.dither,
+    )
+
+    def progress(done: int, total: int, label: str) -> None:
+        if not args.quiet and total:
+            print(f"[{done + 1}/{total}] {label}")
+
+    result = pack_mod.export_pack(
+        presets, args.out, opts, quiet=args.quiet, progress=progress
+    )
+    print(f"\nPack: {result.summary()}")
+    print("Next: drop the folder into your project; manifest.json has loop points and rpms.")
     return 0
 
 
@@ -279,6 +303,18 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--dither", action="store_true", help="TPDF-dither one-shot assets (loops stay periodic)")
     p.add_argument("--quiet", action="store_true")
     p.set_defaults(func=cmd_render)
+
+    p = sub.add_parser("pack", help="render a game-ready pack (loops, events, README, zip)")
+    p.add_argument("--preset", nargs="+", help="preset files or a directory (default: bundled presets)")
+    p.add_argument("--out", default="out/pack", help="output directory")
+    p.add_argument("--sr", type=int, help="override sample rate")
+    p.add_argument("--bits", type=int, choices=(16, 24), help="override bit depth")
+    p.add_argument("--channels", type=int, choices=(1, 2), help="override channels")
+    p.add_argument("--no-events", action="store_true", help="loops only")
+    p.add_argument("--zip", action="store_true", help="also write <out>.zip")
+    p.add_argument("--dither", action="store_true", help="TPDF-dither one-shot assets")
+    p.add_argument("--quiet", action="store_true")
+    p.set_defaults(func=cmd_pack)
 
     p = sub.add_parser("bench", help="measure synthesis throughput (no audio hardware needed)")
     p.add_argument("--preset", nargs="+", required=True)

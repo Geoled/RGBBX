@@ -22,6 +22,10 @@ class RenderOptions:
     events: bool = True
     per_file_normalize: bool = False
     dither: bool = False
+    # Game packs want ``<slug>/layers`` and ``<slug>/events``; the offline tool
+    # keeps its flat ``<slug>__<key>.wav`` layout by default so existing
+    # manifest paths (and anything reading them) do not change.
+    subdirs: bool = False
 
 
 @dataclass
@@ -40,6 +44,10 @@ class RenderedFile:
     loop_end: float = 0.0
     asset_id: int = 0
     lufs: float | None = None
+    # Operating point the loop was rendered at. A game mixer needs this to know
+    # which layer to favour at a given load, not just at a given rpm.
+    load: float | None = None
+    throttle: float | None = None
 
     def to_record(self, out_dir: Path) -> dict:
         return {
@@ -53,6 +61,8 @@ class RenderedFile:
             "rmsDb": round(self.rms_db, 2),
             **({"lufs": round(self.lufs, 2)} if self.lufs is not None else {}),
             **({"referenceRpm": round(self.reference_rpm, 1)} if self.reference_rpm is not None else {}),
+            **({"load": round(self.load, 3)} if self.load is not None else {}),
+            **({"throttle": round(self.throttle, 3)} if self.throttle is not None else {}),
         }
 
 
@@ -118,12 +128,25 @@ def render_preset(
     )
     results: list[RenderedFile] = []
 
-    def emit(kind: str, key: str, x: np.ndarray, looping: bool, rpm: float | None, loop_end: float) -> None:
+    def emit(
+        kind: str,
+        key: str,
+        x: np.ndarray,
+        looping: bool,
+        rpm: float | None,
+        loop_end: float,
+        load: float | None = None,
+        throttle: float | None = None,
+    ) -> None:
         if opts.per_file_normalize:
             x = dsp.normalize(x, preset.render.peak_db)
         if channels == 2 and x.ndim == 1:
             x = _to_stereo(x, sr, looping=looping)
-        path = out_dir / f"{preset.slug}__{key}.wav"
+        base = out_dir
+        if opts.subdirs:
+            base = out_dir / preset.slug / ("layers" if kind == "layer" else "events")
+            base.mkdir(parents=True, exist_ok=True)
+        path = base / f"{preset.slug}__{key}.wav"
         peak_db, rms_db, lufs = _measure(x, sr)
         from .wavio import write_wav
 
@@ -144,6 +167,8 @@ def render_preset(
                 loop_start=0.0,
                 loop_end=loop_end,
                 lufs=lufs,
+                load=load,
+                throttle=throttle,
             )
         )
         if not quiet:
@@ -156,7 +181,16 @@ def render_preset(
     if opts.layers:
         for spec, rpm, length in layers_mod.layer_descriptors(preset, sr):
             x = layers_mod.render_layer(preset, spec, gain, sr=sr, block=block)
-            emit("layer", spec.key, x, True, rpm, x.shape[0] / sr)
+            emit(
+                "layer",
+                spec.key,
+                x,
+                True,
+                rpm,
+                x.shape[0] / sr,
+                load=spec.load,
+                throttle=spec.throttle,
+            )
 
     if opts.events:
         for spec in events_mod.events_for(preset):
@@ -235,8 +269,9 @@ def render_many(
     removed: list[str] = []
     full_run = opts.layers and opts.events
     if full_run:
+        pattern = "**/" if opts.subdirs else ""
         for prefix in sorted({f.preset_slug for f in all_files}):
-            for stale in out_dir.glob(f"{prefix}__*.wav"):
+            for stale in out_dir.glob(f"{pattern}{prefix}__*.wav"):
                 if stale.resolve() not in written:
                     stale.unlink()
                     removed.append(stale.name)
