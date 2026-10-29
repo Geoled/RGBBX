@@ -35,6 +35,9 @@ for pyd in sorted(SOUNDGEN.glob("_dspcore*.pyd")):
 hiddenimports = [
     name for name in collect_submodules("soundgen") if not name.endswith("gasbank")
 ]
+# Imported lazily inside SimulatorApp.export_pack(), so it is easy to miss:
+# without it the button would fail only in the frozen build.
+hiddenimports.append("simulator.exporter")
 
 # imgui_bundle carries native libraries and the fonts hello_imgui falls back
 # to when a system font is missing; collect_all is the supported way to ship

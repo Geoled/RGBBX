@@ -90,6 +90,10 @@ class AppState:
         # the audio thread renders the shots in the background; keep the queue
         # in the state so the panel can show a spinner without touching audio
         self.loading_audio = False
+        # asset export runs on its own thread; the flag feeds the button label
+        # and stops a second click from starting two renders
+        self.exporting = False
+        self.export_path: str = ""
         # one traceback per panel: imgui python bindings can swallow callback
         # exceptions, so a failing panel prints once instead of 60x a second
         self._panel_errors: dict[str, bool] = {}
@@ -264,6 +268,40 @@ class SimulatorApp:
         state.dyno_message = message
         state.throttle = 0.0
         state.status = message
+
+    # ------------------------------------------------------------------ #
+    # game asset export
+    # ------------------------------------------------------------------ #
+    def export_pack(self) -> None:
+        """Render the current engine's loops and one-shots to a game pack.
+
+        Runs on a worker thread: a pack is ~4 s of synthesis plus WAV writing,
+        which would freeze the window if it happened in the draw callback. The
+        preset is copied by reference before the thread starts, so switching
+        engines mid-export cannot change what is being rendered.
+        """
+        state = self.state
+        if state.exporting or state.preset is None:
+            return
+        preset = state.preset
+        state.exporting = True
+        state.export_path = ""
+        state.status = f"exporting {preset.name}..."
+
+        def work() -> None:
+            try:
+                from .. import exporter
+
+                result = exporter.export_preset(preset)
+                state.export_path = str(result.root)
+                state.status = f"exported {result.files} files -> {result.root}"
+                exporter.reveal(result.root)
+            except Exception as exc:  # noqa: BLE001
+                state.status = f"export error: {exc}"
+            finally:
+                state.exporting = False
+
+        threading.Thread(target=work, daemon=True, name="engine-pack-export").start()
 
     # ------------------------------------------------------------------ #
     # the loop
@@ -514,6 +552,7 @@ class Shortcuts:
         "i": "ignition",
         "r": "reframe",
         "g": "shell",
+        "p": "pack",
     }
 
     def __init__(self, app: "SimulatorApp") -> None:
@@ -565,6 +604,8 @@ class Shortcuts:
                 self.app.viewport.frame_camera()
             elif action == "shell":
                 self.app.viewport.show_shell = not self.app.viewport.show_shell
+            elif action == "pack":
+                self.app.export_pack()
 
     @staticmethod
     def _imgui_key(key: str):

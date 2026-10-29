@@ -122,6 +122,17 @@ def draw_controls(app, state, w: float, h: float, pos=None) -> None:
             state.cranking = not state.cranking
             if state.cranking:
                 state.throttle = 0.0
+        imgui.same_line()
+        # Game asset export: one click, the current engine only. It renders in
+        # the background, so the label doubles as the progress indicator.
+        if _button(
+            "EXPORT PACK" if not state.exporting else "EXPORTING...",
+            "P",
+            active=state.exporting,
+            w=160.0,
+            accent=theme.GREEN,
+        ):
+            app.export_pack()
 
         # --- row 2: throttle rail ------------------------------------------- #
         changed, value = _rail("throttle", state.throttle, (origin.x, origin.y + ROW_THROTTLE), inner_w, accent=theme.ORANGE)
