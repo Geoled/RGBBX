@@ -625,11 +625,10 @@ class EngineVoice:
                 )
                 row.append(np.convolve(fbv, hre_bank[idx]))
             self._k_flow_bank.append(row)
-        self._flow_rot = 0
-        # Keep the loop path deterministic: a rotated bank only closes at the
-        # loop point when the bank length divides the loop's firing count.
-        # _ccv_k is exactly that count for loop renders, so loop mode gets a
-        # bank of that size and free-running mode gets the default 3.
+        # Keep the loop path deterministic: the variant is picked by the cycle
+        # number (see the injection site), so the bank only has to divide the
+        # loop's cycle count. _ccv_k is exactly that count for loop renders;
+        # free-running mode gets the default 3.
 
         # --- exhaust: one full chain per cylinder (stage 4) --------------- #
         # Every cylinder gets its own resonator bank, pipe comb and muffler.
@@ -818,6 +817,29 @@ class EngineVoice:
         self._air = native.Convolver(
             dsp.air_kernel(sr, c.air_cutoff_hz, c.air_order, 0.0, p.render.kernel_taps), cb
         )
+        # Master tone EQ (preset [eq]): shelves + bells designed into one FIR.
+        # Inactive presets get no stage at all, so "no [eq] section" stays
+        # bit-identical to the voice before this existed.
+        e = p.eq
+        eq_gains = [abs(e.low_db) > 0.05, abs(e.high_db) > 0.05]
+        eq_gains += [abs(band[2]) > 0.05 for band in e.bands]
+        if e.enabled and any(eq_gains):
+            self._eq = native.Convolver(
+                dsp.eq_kernel(
+                    sr,
+                    low_hz=e.low_hz,
+                    low_db=e.low_db,
+                    low_order=int(e.low_order),
+                    high_hz=e.high_hz,
+                    high_db=e.high_db,
+                    high_order=int(e.high_order),
+                    bands=tuple((float(b[0]), float(b[1]), float(b[2])) for b in e.bands),
+                    taps=p.render.kernel_taps,
+                ),
+                cb,
+            )
+        else:
+            self._eq = None
         self._dcblock = native.Convolver(dsp.dc_block_kernel(sr, 22.0, 0.20), cb)
 
         # --- space: outdoor convolution reverb --------------------------- #
@@ -1178,6 +1200,10 @@ class EngineVoice:
             )
         mix = self._tilt.process(mix)
         mix = self._air.process(mix)
+        if self._eq is not None:
+            # Tone EQ before the compressor/limiter: a boost cannot punch
+            # through the ceiling, and calibrate_gain() measures the same chain.
+            mix = self._eq.process(mix)
         if self._distance_m is not None:
             # air absorption with distance: a first-order complement whose
             # blend rises with r, cutting the top end by up to ~-8 dB at 30 m
@@ -1461,13 +1487,23 @@ class EngineVoice:
                     # stage 4: cylinder idx feeds its own exhaust path
                     self._inject(self._exc_buf[idx], pos, ke, g)
                     if gflow > 0.0:
-                        # audit item 4: rotate through this cylinder's burst
-                        # variants so consecutive firings have different noise
-                        # tails (deterministic body, statistical blowdown)
-                        kf = self._k_flow_bank[idx][self._flow_rot % len(self._k_flow_bank[idx])]
+                        # Rotate through this cylinder's burst variants so
+                        # consecutive firings have different noise tails
+                        # (deterministic body, statistical blowdown).
+                        #
+                        # The variant must be a function of the *cycle number*,
+                        # not of a running counter: events are emitted in
+                        # cylinder-major order within a render span, so a
+                        # counter would depend on where the span boundaries
+                        # fall. That made the rendered loop not exactly
+                        # periodic (-32 dB seam, measured): the last samples of
+                        # a loop were rendered with different bursts than the
+                        # same samples of the next one. ``_j`` is the cycle
+                        # index on the shared grid, so this closes exactly.
+                        bank = self._k_flow_bank[idx]
+                        kf = bank[int(_j) % len(bank)]
                         self._inject(self._exc_buf[idx], pos, kf, gflow * amp * cv)
                     self._inject(self._int_buf, pos, ki, g)
-                    self._flow_rot += 1
 
         # ---- rotating assembly: main-bearing thump and piston slap
         # These follow the *firing* grid, so the bottom end carries the firing

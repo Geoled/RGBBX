@@ -7,7 +7,7 @@ a continuous, latency-free engine note is produced from a handful of assets.
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 
 import numpy as np
 
@@ -24,6 +24,13 @@ class LayerSpec:
     load: float = 0.0
     throttle: float = 0.0
     limiter: bool = False
+    # Per-layer voicing override. Only coast uses it: overrun is heard through
+    # a closed throttle and a still-hot pipe, so its spectrum is darker than a
+    # part-load loop at the same rpm. Measured, coast carried 8 % of its energy
+    # at 2.5-5 kHz against 1.7 % for the part-throttle layer -- the "hiss with
+    # no body" this whole stage is meant to remove.
+    brightness_db: float | None = None
+    air_cutoff_hz: float | None = None
 
 
 DEFAULT_LAYERS: tuple[LayerSpec, ...] = (
@@ -36,7 +43,15 @@ DEFAULT_LAYERS: tuple[LayerSpec, ...] = (
     # dominates real engine braking rides on the same pulse train as
     # part-load combustion, so a small load restores the low end without
     # making it sound like a throttle that is still open.
-    LayerSpec("coast", "Overrun / engine braking", rpm_frac=0.58, load=0.18, throttle=0.08),
+    LayerSpec(
+        "coast",
+        "Overrun / engine braking",
+        rpm_frac=0.58,
+        load=0.18,
+        throttle=0.08,
+        brightness_db=-1.5,
+        air_cutoff_hz=3600.0,
+    ),
     LayerSpec("limiter", "Rev limiter bounce", rpm_frac=1.00, load=1.00, throttle=1.00, limiter=True),
 )
 
@@ -152,8 +167,22 @@ def render_layer(
     rpm = quantized_rpm(preset, layer_rpm(preset, spec), sr)
     total = loop_length_samples(preset, rpm, sr)
 
+    voiced = preset
+    if spec.brightness_db is not None or spec.air_cutoff_hz is not None:
+        # Layer-level voicing, not a global preset change: the same engine is
+        # darker under overrun than at part throttle, and that difference is
+        # the layer's, not the engine's.
+        voiced = replace(
+            preset,
+            character=replace(
+                preset.character,
+                **({"brightness_db": spec.brightness_db} if spec.brightness_db is not None else {}),
+                **({"air_cutoff_hz": spec.air_cutoff_hz} if spec.air_cutoff_hz is not None else {}),
+            ),
+        )
+
     voice = EngineVoice(
-        preset,
+        voiced,
         rpm=rpm,
         load=spec.load,
         throttle=spec.throttle,

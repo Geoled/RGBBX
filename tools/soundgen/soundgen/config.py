@@ -244,6 +244,30 @@ class Space:
     seed: int = 1
 
 
+@dataclass
+class Eq:
+    """Master tone EQ, applied after the voice but before the saturation.
+
+    Two shelves and any number of peaking bands, all in dB. It sits *before*
+    ``character.aggression`` on purpose: the compressor/limiter downstream then
+    sees the equalised signal, so a boost cannot push the output through the
+    safety ceiling, and the calibration gain adapts to the curve automatically.
+
+    Bands are ``[centre_hz, q, gain_db]``; ``q`` around 0.7-1.2 moves roughly
+    an octave, higher values a surgical slice. The section is off by default:
+    a preset without ``[eq]`` sounds exactly as it did before this stage
+    existed.
+    """
+
+    enabled: bool = False
+    low_hz: float = 90.0
+    low_db: float = 0.0
+    low_order: int = 1
+    high_hz: float = 8000.0
+    high_db: float = 0.0
+    high_order: int = 1
+    bands: list[list[float]] = field(default_factory=list)
+
 
 @dataclass
 class Character:
@@ -316,6 +340,7 @@ class Preset:
     turbine: Turbine = field(default_factory=Turbine)
     mechanical: Mechanical = field(default_factory=Mechanical)
     space: Space = field(default_factory=Space)
+    eq: Eq = field(default_factory=Eq)
     character: Character = field(default_factory=Character)
     render: RenderCfg = field(default_factory=RenderCfg)
     notes: str = ""
@@ -338,6 +363,7 @@ _NESTED = {
     "turbine": Turbine,
     "mechanical": Mechanical,
     "space": Space,
+    "eq": Eq,
     "character": Character,
     "render": RenderCfg,
 }
@@ -712,6 +738,29 @@ def _validate(preset: "Preset") -> None:
     _range(sp.tail_gain, "space.tail_gain", 0.0, 2.0)
     if int(sp.seed) < 0:
         raise ValueError("space.seed must be >= 0")
+
+    # --- eq --------------------------------------------------------------- #
+    eq = preset.eq
+    _positive(eq.low_hz, "eq.low_hz")
+    _positive(eq.high_hz, "eq.high_hz")
+    _range(eq.low_db, "eq.low_db", -24.0, 24.0)
+    _range(eq.high_db, "eq.high_db", -24.0, 24.0)
+    if not (1 <= int(eq.low_order) <= 4):
+        raise ValueError("eq.low_order must be between 1 and 4")
+    if not (1 <= int(eq.high_order) <= 4):
+        raise ValueError("eq.high_order must be between 1 and 4")
+    for index, band in enumerate(eq.bands):
+        if len(band) != 3:
+            raise ValueError(f"eq.bands[{index}] must be [centre_hz, q, gain_db]")
+        hz, q, gain_db = band
+        _positive(hz, f"eq.bands[{index}].hz")
+        _positive(q, f"eq.bands[{index}].q")
+        _range(gain_db, f"eq.bands[{index}].gain_db", -24.0, 24.0)
+        if gain_db != 0.0 and hz >= preset.render.sample_rate / 2:
+            raise ValueError(
+                f"eq.bands[{index}].hz must stay below Nyquist "
+                f"({preset.render.sample_rate / 2:.0f} Hz)"
+            )
 
     # --- character -------------------------------------------------------- #
     ch = preset.character

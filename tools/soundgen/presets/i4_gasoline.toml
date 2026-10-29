@@ -82,6 +82,19 @@ irregularity = 0.05
 idle_floor = 0.22
 combustion_gain = 1.0
 
+# Master tone: a little weight under 120 Hz, chest at 220 Hz, and the
+# 3.2 kHz "fan" band pulled down. The bell matters more than the shelf --
+# the I4 measures -4 dB/octave above 200 Hz, and 3 kHz is where the flow
+# noise sits while the note itself is already rolling off.
+[eq]
+enabled = true
+low_hz = 70.0
+low_db = 2.0
+bands = [
+    [220.0, 1.0, 1.5],
+    [3200.0, 0.8, -2.0],
+]
+
 [render]
 sample_rate = 48000
 bit_depth = 16

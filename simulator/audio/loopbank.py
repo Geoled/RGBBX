@@ -39,7 +39,7 @@ from soundgen import layers as layers_mod
 
 # Bump when the rendered signal changes (voice, kernels, layer definitions):
 # old cache files are then ignored instead of serving a stale bank.
-BANK_CACHE_VERSION = 3
+BANK_CACHE_VERSION = 4
 # Keep the cache bounded: 5 layers are ~2.3 MB as float32, and a user can
 # audition all 50 presets. Older banks are evicted least-recently-written.
 MAX_CACHED_BANKS = 12

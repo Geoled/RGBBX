@@ -686,6 +686,81 @@ def presence_kernel(sr: int, centre: float, gain_db: float, q: float = 0.9, taps
     return spectral_kernel(sr, mag, taps)
 
 
+def mag_low_shelf(f, fc: float, gain_db: float, order: int = 1):
+    """First-order shelf: ``gain_db`` at DC, 0 dB well above ``fc``.
+
+    Built as ``1 + (a-1) * lowpass`` rather than a biquad so it composes with
+    the other magnitude helpers and lands in the same FIR designer.
+    """
+    a = 10.0 ** (float(gain_db) / 20.0)
+    return 1.0 + (a - 1.0) * mag_lowpass(f, max(float(fc), 1.0), order)
+
+
+def mag_high_shelf(f, fc: float, gain_db: float, order: int = 1):
+    """Mirror of :func:`mag_low_shelf`: 0 dB at DC, ``gain_db`` above ``fc``."""
+    a = 10.0 ** (float(gain_db) / 20.0)
+    return 1.0 + (a - 1.0) * mag_highpass(f, max(float(fc), 1.0), order)
+
+
+def eq_kernel(
+    sr: int,
+    *,
+    low_hz: float = 90.0,
+    low_db: float = 0.0,
+    low_order: int = 1,
+    high_hz: float = 8000.0,
+    high_db: float = 0.0,
+    high_order: int = 1,
+    bands: tuple[tuple[float, float, float], ...] = (),
+    taps: int = 1025,
+) -> np.ndarray:
+    """Master tone EQ as one linear-phase FIR: two shelves plus peaking bells.
+
+    This is the user-facing tone stage, not a voicing primitive: the shelves set
+    weight and air, the bells move a band without disturbing its neighbours. All
+    of it is one convolution, so it costs exactly as much as the ``air`` stage
+    and -- being LTI -- leaves an already periodic loop periodic.
+
+    The window has to be long enough to resolve the lowest band; a 21 ms kernel
+    cannot shape 80 Hz. ``taps`` therefore grows with the lowest corner, and the
+    cost stays bounded because the partitioned convolver does not care.
+
+    The requirement is expressed in :data:`REF_SR` units like every other
+    ``taps`` argument: :func:`spectral_kernel` rescales the count by
+    ``sr / REF_SR`` so the window keeps its *duration*. Computing the need in
+    samples at ``sr`` instead would silently halve it at 24 kHz and leave a
+    60 Hz shelf unresolved.
+    """
+    corners = [hz for hz, _, _ in bands]
+    if abs(low_db) > 0.05:
+        corners.append(low_hz)
+    low_corner = min(corners) if corners else 90.0
+    # ~6 periods of the lowest corner, so the shelf edge is resolved
+    need = int(6.0 * REF_SR / max(low_corner, 20.0))
+    taps = max(int(taps), need)
+    if taps % 2 == 0:
+        taps += 1
+
+    def mag(f):
+        m = np.ones_like(np.asarray(f, dtype=np.float64))
+        if abs(low_db) > 0.05:
+            m = m * mag_low_shelf(f, low_hz, low_db, low_order)
+        if abs(high_db) > 0.05:
+            m = m * mag_high_shelf(f, high_hz, high_db, high_order)
+        for hz, q, gain_db in bands:
+            if abs(gain_db) <= 0.05:
+                continue
+            c = min(max(float(hz), 20.0), sr / 2 * 0.999)
+            q = max(float(q), 0.05)
+            r = np.asarray(f, dtype=np.float64) / c
+            bell = (r / q) / np.maximum(np.sqrt((1.0 - r * r) ** 2 + (r / q) ** 2), 1e-12)
+            a = 10.0 ** (float(gain_db) / 20.0)
+            m = m * (1.0 + (a - 1.0) * bell)
+        return m
+
+    return spectral_kernel(sr, mag, taps)
+
+
 def air_kernel(sr: int, cutoff: float = 6200.0, order: int = 2, tilt_db: float = 0.0, taps: int = 1025):
     """End-of-chain voicing: air absorption plus the natural downward slope.
 
